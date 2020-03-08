@@ -20,8 +20,8 @@ class DriveMechOdo : public PosSensor{
     void reset_position();
     //dictony contiang previous rotation of each motors and an arrya of mtors by same refines. futre opimization could be to use a strut
   protected:
-    std::map<const char, pros::Motor*> d_motors;
-    std::map<const char,double> pre_rot;
+    std::map<const char* , pros::Motor*> d_motors;
+    std::map<const char* ,double> pre_rot;
     double alpha = 0;
     double beta = 0;
 };
