@@ -8,21 +8,13 @@ DriveMechOdo::DriveMechOdo(pros::Motor* lf, pros::Motor* lb, pros::Motor* rf, pr
   d_motors["rf"] = rf;
   d_motors["rb"] = rb;
   //set prev value std::map<, value> map to zero;
-  pre_rot["lf"] = 0;
-  pre_rot["lr"] = 0;
-  pre_rot["rf"] = 0;
-  pre_rot["rb"] = 0;
-
   //zero all d_motors and set encoder units to rotation
   d_motors["lf"]->set_encoder_units(pros::E_MOTOR_ENCODER_ROTATIONS);
   d_motors["lr"]->set_encoder_units(pros::E_MOTOR_ENCODER_ROTATIONS);
   d_motors["rf"]->set_encoder_units(pros::E_MOTOR_ENCODER_ROTATIONS);
   d_motors["rb"]->set_encoder_units(pros::E_MOTOR_ENCODER_ROTATIONS);
-  //tare motor positions
-  d_motors["lf"]->tare_position();
-  d_motors["lr"]->tare_position();
-  d_motors["rf"]->tare_position();
-  d_motors["rb"]->tare_position();
+  //reset motor positions
+  reset_position();
 }
 
 //cacluate new postion using odometic functiosn found in Nagatani et a c2000
@@ -46,12 +38,22 @@ void DriveMechOdo::update_position(){
   //add velcotiy rotate to postion
   position.position += velocity;
   //add heading
-  position.h += head;
+  position.h += heading;
   //set previous postion to current postion.
   pre_rot["lf"] += d1;
   pre_rot["lr"] += d2;
   pre_rot["rf"] += d3;
   pre_rot["rb"] += d4;
+}
 
-
+void DriveMechOdo::reset_position(){
+  position = Coord();
+  pre_rot["lf"] = 0;
+  pre_rot["lr"] = 0;
+  pre_rot["rf"] = 0;
+  pre_rot["rb"] = 0;
+  d_motors["lf"]->tare_position();
+  d_motors["lr"]->tare_position();
+  d_motors["rf"]->tare_position();
+  d_motors["rb"]->tare_position();
 }

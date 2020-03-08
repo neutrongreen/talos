@@ -36,17 +36,18 @@ class Vector2D{
 
 //class for location + heaidng
 class Coord{
-  //constructor
-  Coord(double nx = 0, double ny = 0, double nh = 0);
-  //changed x and y to vetor for utility
-  Vector2D position;
-  double h;
-  //overding Polar  math operators
-  // * and / are scalars becuase * and / operators dont work with vector to vecotr math
+ public:
+    //constructor
+    Coord(double Snx = 0, double ny = 0, double nh = 0);
+    //changed x and y to vetor for utility
+    Vector2D position;
+    double h;
+    //overding Polar  math operators
+    // * and / are scalars becuase * and / operators dont work with vector to vecotr math
 
-  //overloading Polar logic operators
-  bool operator==(const Coord coord);
-  bool operator!=(const Coord coord);
+    //overloading Polar logic operators
+    bool operator==(const Coord coord);
+    bool operator!=(const Coord coord);
 
 };
 
