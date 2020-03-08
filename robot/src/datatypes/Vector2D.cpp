@@ -87,3 +87,13 @@ void Vector2D::normalized(){
   x /= m;
   y /= m;
 }
+
+//add rotation functions
+void Vector2D::rotate(double angle){
+  //set old xy values
+  double oldx = x;
+  double oldy = y;
+  //cacluate rotated vector
+  x = oldx*cos(angle)-oldy*sin(angle);
+  y = oldx*sin(angle)+oldy*cos(angle);
+}

@@ -30,6 +30,8 @@ class Vector2D{
     //define normalize vecotor function
     //will add more functions as needed
     void normalized();
+    //add rotation function that will rotoa vector by angle
+    void rotate(double angle);
 };
 
 //class for location + heaidng
