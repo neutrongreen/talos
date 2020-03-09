@@ -38,7 +38,7 @@ class Vector2D{
 class Coord{
  public:
     //constructor
-    Coord(double Snx = 0, double ny = 0, double nh = 0);
+    Coord(double nx = 0, double ny = 0, double nh = 0);
     //changed x and y to vetor for utility
     Vector2D position;
     double h;

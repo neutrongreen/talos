@@ -18,10 +18,11 @@ class DriveMechOdo : public PosSensor{
     DriveMechOdo(pros::Motor* lf, pros::Motor* lb, pros::Motor* rf, pros::Motor* rb, double a, double b);
     void update_position();
     void reset_position();
-    //dictony contiang previous rotation of each motors and an arrya of mtors by same refines. futre opimization could be to use a strut
   protected:
+    //dictony contiang previous rotation of each motors and an arrya of mtors by same refines. futre opimization could be to use a strut
     std::map<const char* , pros::Motor*> d_motors;
     std::map<const char* ,double> pre_rot;
+    //alpha and beta constants detemend by calerbration
     double alpha = 0;
     double beta = 0;
 };
@@ -30,13 +31,18 @@ class DriveMechOdo : public PosSensor{
 class DriveDifOdo : public PosSensor{
   public:
     //construcr
-    DriveDifOdo(pros::Motor* l_motors_n[], pros::Motor* r_motors_n[]);
+    DriveDifOdo(pros::Motor* l_motors_n[], pros::Motor* r_motors_n[], double width);
+    void update_position();
+    void reset_position();
+  protected:
+    //drive width
+    double d_width;
     //define motors refrence array
-    pros::Motor* l_motors[8];
-    pros::Motor* r_motors[8];
+    pros::Motor* l_motors[4];
+    pros::Motor* r_motors[4];
     //define previous value arrays for mtors
-    double l_motors_p[8];
-    double r_motors_p[8];
+    double l_motors_p[4];
+    double r_motors_p[4];
 };
 //inu postion cacluation class
 
