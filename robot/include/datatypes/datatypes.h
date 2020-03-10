@@ -29,9 +29,9 @@ class Vector2D{
     bool operator!=(const Vector2D vec);
     //define normalize vecotor function
     //will add more functions as needed
-    void normalized();
+    Vector2D normalized();
     //add rotation function that will rotoa vector by angle
-    void rotate(double angle);
+    Vector2D rotate(double angle);
 };
 
 //class for location + heaidng

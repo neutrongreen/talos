@@ -2,6 +2,9 @@
 #include "main.h"
 #include "datatypes/datatypes.h"
 #include <map>
+
+//define gravitu
+#define G  9.80665
 //define base class for all coord sensors
 class PosSensor{
   public:
@@ -28,6 +31,7 @@ class DriveMechOdo : public PosSensor{
 };
 
 //odomnitry fo diffrental drives
+
 class DriveDifOdo : public PosSensor{
   public:
     //construcr
@@ -45,5 +49,20 @@ class DriveDifOdo : public PosSensor{
     double r_motors_p[4];
 };
 //inu postion cacluation class
+
+//x must always be the horizontail axis
+class InNavUnitOdo : public PosSensor{
+  public:
+    //take sensor object
+    InNavUnitOdo(pros::Imu* sensor);
+    //define velocity vector
+    Vector2D velocity;
+    //overide update postion and reset postion declerations. update postion requres deltatime in ms
+    void update_position(int deltatime);
+    void reset_position();
+  protected:
+    //internal navgation unti
+    pros::Imu* inu;
+};
 
 #endif /* end of include guard:  */

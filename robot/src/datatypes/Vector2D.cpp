@@ -82,18 +82,19 @@ bool Vector2D::operator!=(const Vector2D vec){
 //will add more as needed
 
 //normale vector by finding magnatued and divitng x and y bi it, resting the toal magnatued to 1.
-void Vector2D::normalized(){
+Vector2D Vector2D::normalized(){
   double m = std::sqrt(x*x + y*y);
-  x /= m;
-  y /= m;
+  return Vector2D(x/m, y/m);
 }
 
 //add rotation functions
-void Vector2D::rotate(double angle){
+Vector2D Vector2D::rotate(double angle){
   //set old xy values
   double oldx = x;
   double oldy = y;
   //cacluate rotated vector
-  x = oldx*cos(angle)-oldy*sin(angle);
-  y = oldx*sin(angle)+oldy*cos(angle);
+  double nx = oldx*cos(angle)-oldy*sin(angle);
+  double ny = oldx*sin(angle)+oldy*cos(angle);
+  //return rotated vector
+  return Vector2D(nx, ny);
 }
