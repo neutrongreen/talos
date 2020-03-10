@@ -6,6 +6,7 @@ InNavUnitOdo::InNavUnitOdo(pros::Imu* sensor){
   //set the interal navagtion unti to the poitner to sensor
   inu = sensor;
   //reset sensors
+  reset_position();
 }
 
 //rest nav unit
