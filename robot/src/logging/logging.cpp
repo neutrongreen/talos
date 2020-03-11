@@ -11,10 +11,10 @@ void Logger::log(char stringbuf[]){
   FILE *fp;
   //open file form recorded adress
   //make sure you can onyl append to file
-  fp = std::fopen(filelocation, "a+");
+  fp = fopen(filelocation, "a+");
   //write to file stringbuf
-  std::fputs(stringbuf, fp);
+  fputs(stringbuf, fp);
   //close file to cleanup prefonmanes
   //might need to change if updates happen frequently
-  std::fclose(fp);
+  fclose(fp);
 }

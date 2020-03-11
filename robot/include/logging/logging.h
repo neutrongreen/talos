@@ -1,8 +1,6 @@
 #ifndef _LOGGING
-//include sensors files for possensor
-#include "sensors/sensors.h"
 //includi stdio for file input output
-#include <stdio.h>
+#include "main.h"
 
 class Logger{
   public:
