@@ -13,20 +13,29 @@ markers = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_7X7_50)
 #create video
 cv2.namedWindow("Video")
 
-while(camera.grab())
+while True:
     #define images
-    image, imagecopy = 0
-    camera.retrive(image)
+    image = 0
+    imageCopy = 0
+    ret, image = camera.read()
     #copy to iamgecopy 
-    image.copyTo(imageCopy)
+    imageCopy = image
     #detectmarkers and outputs imagase
     #setuop corents
-    cv2.aruco.detectMarkers(image, markers)
+    corners = []
+    ids = []
+    rejectedimgpoints = []
+
+    #detect markers
+    corners, ids, rejectedimgpoints = cv2.aruco.detectMarkers(
+        image, markers, corners)
+    #dectect pose
     
-    corners, ids, rejectedimgpoints = cv2.aruco.detectMarkers(image, markers)
-    if ids.size() > 0:
-        cv2.aruco.drawDetectedMarkers(imageCopy, corners, ids)
-    cv2.imshow("out", imagecopy)
+    
+    cv2.aruco.drawDetectedMarkers(imageCopy, corners, ids)
+    cv2.imshow("Video", imageCopy)
     key = cv2.waitKey(30)
-    if key != 0:
+    if key > 0:
         break
+camera.release()
+cv2.destroyAllWindows() 
