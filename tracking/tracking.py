@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+#set icon wdiht in meters
+markerwdith = 0.0525
+
 #inputvideo file
 
 camera = cv2.VideoCapture()
@@ -31,9 +34,11 @@ while True:
         image, markers, corners)
     #dectect pose
     
-    
+    #draw detected markes
     cv2.aruco.drawDetectedMarkers(imageCopy, corners, ids)
+    #show on windows
     cv2.imshow("Video", imageCopy)
+    #relace
     key = cv2.waitKey(30)
     if key > 0:
         break
