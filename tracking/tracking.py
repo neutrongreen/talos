@@ -1,26 +1,9 @@
 import cv2
+import csv
 import numpy as np
 import math
+import time 
 
-#inverse the pespective
-
-# Experimental inversion
-def inversePerspectiveWithTransformMatrix(tvec, rvec):
-    R, _ = cv2.Rodrigues(rvec)  # 3x3 representation of rvec
-    R = np.matrix(R).T  # transpose of 3x3 rotation matrix
-    transformMatrix = np.zeros((4, 4), dtype=float)  # Transformation matrix
-    # Transformation matrix fill operation, matrix should be [R|t,0|1]
-    transformMatrix[0:3, 0:3] = R
-    transformMatrix[0:3, 3] = tvec
-    transformMatrix[3, 3] = 1
-    # Inverse the transform matrix to get camera centered Transform
-    _transformMatrix = np.linalg.inv(transformMatrix)
-    # Extract new rotation and translation vectors from transform matrix
-    _R = _transformMatrix[0:3, 0:3]
-    _tvec = _transformMatrix[0:3, 3]
-    _rvec, _ = cv2.Rodrigues(_R)
-    # return
-    return _tvec, _rvec
 
 #convert rotationmatrix to eualr angles
 def yawpitchrolldecomposition(Rx):
@@ -57,47 +40,50 @@ cv2.namedWindow("Video", cv2.WINDOW_NORMAL)
 cameraMatrix = np.loadtxt("calb/cameraMatrix.csv", delimiter=",")
 distCoeffs = np.loadtxt("calb/distCoeffs.csv", delimiter=",")
 
-#TESTING LOOP, WILL BE REMOVED
-while True:
-     #define images
-    image = 0
-    imageCopy = 0
-    ret, image = camera.read()
-    #copy to iamgecopy 
-    imageCopy = image
-    #detectmarkers and outputs imagase
-    #setuop corents
-    corners = []
-    ids = []
-    rejectedimgpoints = []
+with open("data/{}_data.csv".format(time.time()), "w+", newline='') as csvfile:
+    csvfile_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    while True:
+        #define images
+        image = 0
+        imageCopy = 0
+        ret, image = camera.read()
+        #copy to iamgecopy 
+        imageCopy = image
+        #detectmarkers and outputs imagase
+        #setuop corents
+        corners = []
+        ids = []
+        rejectedimgpoints = []
 
-    #detect markers
-    corners, ids, rejectedimgpoints = cv2.aruco.detectMarkers(
-        image, markers, corners, None, None, None, cameraMatrix, distCoeffs)
-    #chekc if any markers are present
-    if len(corners) > 0:
-        #estimate pose of markers
-        rvecs, tvecs, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners, markerWidth, cameraMatrix, distCoeffs)
-        #draw detected markes if any present
-        imageCopy = cv2.aruco.drawDetectedMarkers(imageCopy, corners, ids)
-        #iterate over markers (list of rvecs will be the same length as other markers)
-        for i in range(len(rvecs)):
-            #inverse the perspective
-            intvec, inrvec = inversePerspectiveWithTransformMatrix(tvecs[i], rvecs[i])
-            #get attute of vectors
-            angle = yawpitchrolldecomposition(cv2.Rodrigues(intvec))
-            #draw marker 
-            imageCopy = cv2.aruco.drawAxis(imageCopy, cameraMatrix, distCoeffs, rvecs[i], tvecs[i], markerWidth/2)
-            #print amers postions
-            print("marker{i:0.2f}: {x:0.2f}:{y:0.2f}".format(i=i,x=angle, y=intvec), end="\r")
-        #show on windows
-    cv2.imshow("Video", imageCopy)
-    #relace
-    key = cv2.waitKey(30)
-    if key > 0:
-        break
-camera.release()
-cv2.destroyAllWindows() 
+        #detect markers
+        corners, ids, rejectedimgpoints = cv2.aruco.detectMarkers(
+            image, markers, corners, None, None, None, cameraMatrix, distCoeffs)
+        #chekc if any markers are present
+        if len(corners) > 0:
+            #estimate pose of markers
+            rvecs, tvecs, _objPoints = cv2.aruco.estimatePoseSingleMarkers(corners, markerWidth, cameraMatrix, distCoeffs)
+            #draw detected markes if any present
+            imageCopy = cv2.aruco.drawDetectedMarkers(imageCopy, corners, ids)
+            #iterate over markers (list of rvecs will be the same length as other markers)
+            for i in range(len(rvecs)):
+                #inverse the perspective
+                #get attute of vectors
+                angle = yawpitchrolldecomposition(cv2.Rodrigues(rvecs[i]))
+                #draw marker 
+                imageCopy = cv2.aruco.drawAxis(imageCopy, cameraMatrix, distCoeffs, rvecs[i], tvecs[i], markerWidth/2)
+                #print amers postions
+                print("marker:{:04.2f} Rot: {:04.2f}    {:04.2f}   {:04.2f} Trans: {:04.2f}     {:04.2f}    {:04.2f}                        ".format(
+                    i , angle[0], angle[1], angle[2], tvecs[i, 0, 0], tvecs[i, 0, 1], tvecs[i, 0, 2]), end="\r", flush=True)
+
+                csvfile_writer.writerow([time.time(), i, angle[0], angle[1], angle[2], tvecs[i][0][0], tvecs[i][0][1], tvecs[i][0][2]])
+            #show on windows
+        cv2.imshow("Video", imageCopy)
+        #relace
+        key = cv2.waitKey(30)
+        if key > 0:
+            break
+    camera.release()
+    cv2.destroyAllWindows() 
 
 #daft punk intenisfys 
-print("end of line")
+print("\nend of line")
