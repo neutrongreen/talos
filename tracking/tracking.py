@@ -4,6 +4,11 @@ import numpy as np
 import math
 import time 
 
+def zerovalue(zero, value):
+    if zero:
+        for i in range(len(zero)):
+            value[i] -= zero[i]
+    return value
 
 #convert rotationmatrix to eualr angles
 def yawpitchrolldecomposition(Rx):
@@ -21,7 +26,7 @@ def yawpitchrolldecomposition(Rx):
     return [math.degrees(z1), math.degrees(x), math.degrees(z2)]
 
 #set icon wdiht in cm
-markerWidth = 5.2
+markerWidth = 20
 
 #inputvideo file
 
@@ -39,6 +44,7 @@ cv2.namedWindow("Video", cv2.WINDOW_NORMAL)
 
 cameraMatrix = np.loadtxt("calb/cameraMatrix.csv", delimiter=",")
 distCoeffs = np.loadtxt("calb/distCoeffs.csv", delimiter=",")
+zerovalues = [0] * 50
 
 with open("data/{}_data.csv".format(time.time()), "w+", newline='') as csvfile:
     csvfile_writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -66,22 +72,36 @@ with open("data/{}_data.csv".format(time.time()), "w+", newline='') as csvfile:
             imageCopy = cv2.aruco.drawDetectedMarkers(imageCopy, corners, ids)
             #iterate over markers (list of rvecs will be the same length as other markers)
             for i in range(len(rvecs)):
+                rvec = np.matrix(rvecs[i]).reshape((3, 1))
+                tvec = np.matrix(tvecs[i]).reshape((3, 1))
+                R, _ = cv2.Rodrigues(rvec)
+                R = np.matrix(R).T
+                tvec = np.dot(-R, np.matrix(tvec))
+                tvec = np.asarray(tvec)
                 #inverse the perspective
                 #get attute of vectors
                 angle = yawpitchrolldecomposition(cv2.Rodrigues(rvecs[i]))
-                #draw marker 
+                #draw marker
+                #  
                 imageCopy = cv2.aruco.drawAxis(imageCopy, cameraMatrix, distCoeffs, rvecs[i], tvecs[i], markerWidth/2)
                 #print amers postions
-                print("marker:{:04.2f} Rot: {:04.2f}    {:04.2f}   {:04.2f} Trans: {:04.2f}     {:04.2f}    {:04.2f}                        ".format(
-                    i , angle[0], angle[1], angle[2], tvecs[i, 0, 0], tvecs[i, 0, 1], tvecs[i, 0, 2]), end="\r", flush=True)
-
-                csvfile_writer.writerow([time.time(), i, angle[0], angle[1], angle[2], tvecs[i][0][0], tvecs[i][0][1], tvecs[i][0][2]])
+                valuesraw = [angle[0], angle[1], angle[2], tvec[0, 0], tvec[1, 0], tvec[2, 0]]
+                values = zerovalue(zerovalues[ids[i][0]], valuesraw)
+                
+                print("marker:{:04.1f} Rot: {:04.1f}    {:04.1f}   {:04.1f} Trans: {:04.1f}     {:04.1f}    {:04.1f}                        ".format(
+                    ids[i][0], values[0], values[1], values[2], values[3], values[4], values[5], end="\r"))
+                        
+                csvfile_writer.writerow([time.time(), ids[i][0], values[0], values[1], values[2], values[3], values[4], values[5]])
+                key = cv2.waitKey(30)
+                if key == 122:
+                    zerovalues[ids[i][0]] = valuesraw
             #show on windows
         cv2.imshow("Video", imageCopy)
         #relace
         key = cv2.waitKey(30)
-        if key > 0:
+        if key == 27 :
             break
+            
     camera.release()
     cv2.destroyAllWindows() 
 

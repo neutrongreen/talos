@@ -1,12 +1,32 @@
 #include "main.h"
 #include "sensors/sensors.h"
 
+//define motor objects
+pros::Motor fl_motor(20, false);
+pros::Motor fr_motor(11, true);
+pros::Motor bl_motor(10, false);
+pros::Motor br_motor(1, true);
+//define mater CONTROLLER_MASTER
+pros::Controller master(CONTROLLER_MASTER);
+
+
+//define program states
+enum  program_states{
+  E_DRIVE = 0,
+  E_CALIBRATE = 1
+};
+
+program_states state = E_DRIVE;
 /**
  * A callback function for LLEMU's center button.
  *
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
+
+
+ //define rotationvalue
+ int autonrot = 5;
 void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
@@ -28,6 +48,15 @@ void initialize() {
 	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
+
+  fl_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
+  bl_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
+  fr_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
+  br_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
+  fl_motor.tare_position();
+  bl_motor.tare_position();
+  fr_motor.tare_position();
+  br_motor.tare_position();
 }
 
 /**
@@ -74,16 +103,51 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
-	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
+//program scripts
+void calabration(){
+  //move foward rotationvalue
+  fl_motor.move_relative(autonrot, 100);
+  fr_motor.move_relative(autonrot, 100);
+  bl_motor.move_relative(autonrot, 100);
+  br_motor.move_relative(autonrot, 100);
+  //wait 5 seconds
+  pros::delay(5000);
+  //move sideways
+  fl_motor.move_relative(autonrot, 100);
+  bl_motor.move_relative(-autonrot, 100);
+  fr_motor.move_relative(-autonrot, 100);
+  br_motor.move_relative(autonrot, 100);
+  //wait 5 seconds
+  pros::delay(5000);
+  //turn
+  fl_motor.move_relative(autonrot/2, 100);
+  bl_motor.move_relative(-autonrot/2, 100);
+  fr_motor.move_relative(-autonrot/2, 100);
+  br_motor.move_relative(autonrot/2, 100);
+}
+void drive(){
+  while(true){
+    int x = master.get_analog(ANALOG_LEFT_X);
+    int y = master.get_analog(ANALOG_LEFT_Y);
+    int turn = master.get_analog(ANALOG_RIGHT_X);
+    fl_motor =  y + turn + x;
+    bl_motor =  y + turn - x;
+    fr_motor =  y - turn - x;
+    br_motor =  y - turn + x;
+    //delay
+    pros::delay(20);
+  }
+}
 
-		left_mtr = left;
-		right_mtr = right;
-		pros::delay(20);
-	}
+void opcontrol() {
+  //choose main function based up on program state
+  switch(state){
+    case E_DRIVE:
+      drive();
+      break;
+    case E_CALIBRATE:
+      calabration();
+      break;
+  }
+  drive();
 }

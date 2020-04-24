@@ -34,7 +34,7 @@ void InNavUnitOdo::update_position(int deltatime){
   velocity += Vector2D((accel.x*G)/deltatime, (accel.y*G)/deltatime);
   //update coord.
   //add velocity to postion rotated by current heading
-  position.position += velocity.rotate()
+  position.position += velocity.rotate(inu->get_yaw());
   //set current heading to mearured eaidng\.
   position.h = inu->get_yaw();
 }

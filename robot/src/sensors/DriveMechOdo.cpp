@@ -33,8 +33,8 @@ void DriveMechOdo::update_position(){
   velocity.y = 1/4*(d1+d2+d3+d4);
   //cacluate temparty heading
   double heading = (-d1+d2-d3+d4) * beta;
-  //roate velocity to current robot refrencefram orientation
-  velocity.rotate(position.h);
+  //roate velocity to current robot refrencefram orientation and the new heading
+  velocity = velocity.rotate(position.h+heading);
   //add velcotiy rotate to postion
   position.position += velocity;
   //add heading
