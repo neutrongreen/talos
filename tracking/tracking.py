@@ -49,7 +49,7 @@ def get_marker_pose(corners, markerWidth, cameraMatrix, distCoeffs):
     #convert tvec to array
     tvec = np.squeeze(np.asarray(tvec)).tolist()
     #convert rvec to eular angles for ease of use
-    rvec = get_eular(np.asarray(Rt))
+    rvec = get_eular(np.asarray(R))
     #return both rvecx and tvec adn the inital rvec and tvec
     return (rvec, tvec, iRvec, iTvec)
 

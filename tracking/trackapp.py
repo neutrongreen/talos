@@ -4,11 +4,8 @@ import cv2
 import csv
 import numpy as np
 import time 
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
-from matplotlib import style
+
 from kivy.config import Config
 Config.set('graphics', 'resizable', False)
 Config.set('graphics', 'width', '1280')
@@ -16,8 +13,6 @@ Config.set('graphics', 'height', '720')
 Config.set('graphics', 'minimum_width', '1280')
 Config.set('graphics', 'minimum_height', '720')
 
-matplotlib.use('module://kivy.garden.matplotlib.backend_kivy')
-style.use('dark_background')
 kivy.require("1.0.7")
 
 
@@ -119,7 +114,7 @@ class KivyTracker(Image):
 class RootWidget(Widget):
     def __init__(self, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
-        self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.capture = cv2.VideoCapture(1, cv2.CAP_DSHOW)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.tracker = KivyTracker(capture=self.capture, fps=30)
