@@ -53,7 +53,8 @@ class KivyTracker(Image):
         self.xa = CircularBuffer(5)
         self.ya = CircularBuffer(5)
         self.za = CircularBuffer(5)
-
+        self.xr = 0
+        self.yr = 0
         self.pitcha = CircularBuffer(5)
         self.yawa = CircularBuffer(5)
         self.rolla = CircularBuffer(5)
@@ -84,19 +85,23 @@ class KivyTracker(Image):
                 self.yawa.append(tvec[2])
                 self.rolla.append(tvec[1])
 
-                xr = math.sqrt((math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value() - self.zero[0])) - (math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value() - self.zero[1])))
-                yr = math.sqrt((math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value() - self.zero[0])) + (math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value() - self.zero[1])))
+                #rotate vector valuess
+                self.xr = math.sqrt((math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value())) - (math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value())))
+                self.yr = math.sqrt((math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value())) + (math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value())))
+                xz = self.xr - self.zero[0]
+                yz = self.yr - self.zero[1]
+
                 #if csv file open append to csv file
                 if self.filewriter:
-                    self.filewriter.writerow([time.time(), xr, yr, self.za.get_value() - self.zero[2], self.pitcha.get_value() - self.zero[3], self.yawa.get_value() - self.zero[4], self.rolla.get_value() - self.zero[5]])
+                    self.filewriter.writerow([time.time(), xz, yz, self.za.get_value() - self.zero[2], self.pitcha.get_value() - self.zero[3], self.yawa.get_value() - self.zero[4], self.rolla.get_value() - self.zero[5]])
 
                 #print xyz values na pitch yaw roll
-            self.app.root.ids.vx.text = "X:{:4.1f}".format(xr)
-            self.app.root.ids.vy.text = "Y:{:4.1f}".format(yr)
+            self.app.root.ids.vx.text = "X:{:4.1f}".format(xz)
+            self.app.root.ids.vy.text = "Y:{:4.1f}".format(yz)
             self.app.root.ids.vz.text = "Z:{:4.1f}".format(self.za.get_value() - self.zero[2])
 
-            self.app.root.ids.ax.text = "Pitch:{:4.1f}".format(xr)
-            self.app.root.ids.ay.text = "Yaw:{:4.1f}".format(yr)
+            self.app.root.ids.ax.text = "Pitch:{:4.1f}".format(xz)
+            self.app.root.ids.ay.text = "Yaw:{:4.1f}".format(yz)
             self.app.root.ids.az.text = "Roll:{:4.1f}".format(self.rolla.get_value() - self.zero[5])
             # convert it to texture
             buf1 = cv2.flip(img, 0)
@@ -107,8 +112,8 @@ class KivyTracker(Image):
             # display image from the texture
             self.texture = image_texture
     def zerovalues(self):
-            self.zero[0] = self.xa.get_value()
-            self.zero[1] = self.ya.get_value()
+            self.zero[0] = self.xr
+            self.zero[1] = self.yr
             self.zero[2] = self.za.get_value()
             self.zero[3] = self.pitcha.get_value()
             self.zero[4] = self.yawa.get_value()
