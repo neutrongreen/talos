@@ -52,8 +52,7 @@ def get_marker_pose(corners, markerWidth, cameraMatrix, distCoeffs):
     rvec = get_eular(np.asarray(R))
     #return both rvecx and tvec adn the inital rvec and tvec
     #rotate tvec x by rvec
-    tvec[0] = math.sqrt((math.cos(math.radians(rvec[0])) * tvec[1]) - (math.sin(math.radians(rvec[0])) * tvec[0]))
-    tvec[0] = math.sqrt((math.cos(math.radians(rvec[0])) * tvec[1]) + (math.sin(math.radians(rvec[0])) * tvec[0]))
+
     #rotate tvec y by revec
     return (rvec, tvec, iRvec, iTvec)
 
