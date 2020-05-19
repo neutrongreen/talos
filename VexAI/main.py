@@ -76,7 +76,6 @@ class Match():
         return (blue_score * 6, red_score * 6)
             
 
-        elif values2[0] == Colour.BlUE:
 
     def score_match(self):
         blue_score = 0
