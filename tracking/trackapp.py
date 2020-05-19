@@ -76,6 +76,8 @@ class KivyTracker(Image):
             #
             img, rvec, tvec = tracking.track_marker(img, self.markerDic, 0, 20, self.cameraMatrix, self.distCoeffs,)
             #set text icons
+            xz = 0
+            yz = 0
             if rvec and tvec:
                 self.xa.append(tvec[0])
                 self.ya.append(tvec[1])
@@ -86,8 +88,14 @@ class KivyTracker(Image):
                 self.rolla.append(tvec[1])
 
                 #rotate vector valuess
-                self.xr = math.sqrt((math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value())) - (math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value())))
-                self.yr = math.sqrt((math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value())) + (math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value())))
+                try:
+                    self.xr = math.sqrt((math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value())) - (math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value())))
+                except:
+                    print("xerror")
+                try:
+                    self.yr = math.sqrt((math.sin(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.xa.get_value())) + (math.cos(math.radians(self.pitcha.get_value() - self.zero[3])) * (self.ya.get_value())))
+                except:
+                    print("yerror")
                 xz = self.xr - self.zero[0]
                 yz = self.yr - self.zero[1]
 
