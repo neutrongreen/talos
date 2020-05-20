@@ -1,19 +1,19 @@
 from enum import Enum
 import numpy as np
-
+from tensorflow import convert_to_tensor
 
 class Colour(Enum):
     RED = 1
     BlUE = 2
 
 class Match():
-    def __init__(self, intial_balls = 16, match_size = 3):
+    def __init__(self):
         #create match array and set all to zero
-        self.self.match_size = match_size
-        self.env = [[[None for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)]
+        self.match_size = 3
+        self.env = [[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)]
         #ball amout dictonary
-        self.inital_balls = intial_balls
-        self.balls = {Colour.BlUE: intial_balls, Colour.RED: intial_balls}
+        self.inital_balls = 16
+        self.balls = {Colour.BlUE: self.inital_balls, Colour.RED: self.inital_balls}
     #get tick tack toe of field
     def _get_ttt(self):
         red_score = 0
@@ -89,7 +89,7 @@ class Match():
                     if z == Colour.BlUE:
                         blue_score += 1
         #get ttt score
-        blue_score_top, red_score_top = self._get_ttt(self.env, 3)
+        blue_score_top, red_score_top = self._get_ttt()
         blue_score += blue_score_top
         red_score += red_score_top
         #return resulting score
@@ -107,3 +107,28 @@ class Match():
             ball = self.env[x][y].pop(0)
             self.env[x][y].append(None)
             self.balls[ball] += 1
+    
+    def get_state(self):
+        red, blue = self.score_match()
+        #reward is for red, but can be inverted for blue as it is inverese for blue
+        reward = (red - blue)/64
+        
+        #convert match into binary arrays for ai to process
+        #define temp arrays
+        temp_blue   =   np.array([[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)])
+        temp_red    =   np.array([[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)])
+        temp_none   =   np.array([[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)])
+        #create binary arrays
+        for x in range(len(self.env)):
+            for y in range(len(self.env[x])):
+                for z in range(len(self.env[x][y])):
+                    if self.env[x][y][z] == Colour.BlUE:
+                        temp_blue[x][y][z] = 1
+                    elif self.env[x][y][z] == Colour.RED:
+                        temp_red[x][y][z] = 1
+                    else:
+                        temp_none[x][y][z] = 1
+
+        observation = np.concatenate((temp_blue.flatten(), temp_red.flatten(), temp_none.flatten()))
+        #flatten and merge arrays and convert to tensor for easy uasage
+        return observation, reward
