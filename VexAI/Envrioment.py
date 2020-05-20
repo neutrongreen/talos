@@ -107,12 +107,3 @@ class Match():
             ball = self.env[x][y].pop(0)
             self.env[x][y].append(None)
             self.balls[ball] += 1
-
-
-
-    
-
-if __name__ == '__main__':
-    self.envtest = [[[None for x in range(3)] for y in range(3)] for x in range(3)]
-    self.envresult = score_self.env(self.envtest, 3)
-    print(self.envresult)
