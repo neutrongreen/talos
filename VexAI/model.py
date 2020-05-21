@@ -57,8 +57,8 @@ class Actor():
         return model
 
     def get_action(self):
-        print(self.observation)
-        p = self.actor.predict([self.observation.reshape(1, 81), DUMMY_VALUE, DUMMY_ACTION])
+        print(self.observation.reshape(1, 81))
+        p = self.actor.predict([self.observation.reshape(1, 81), DUMMY_VALUE, DUMMY_ACTION])[0]
         print(p)
     
 ai = Actor()
