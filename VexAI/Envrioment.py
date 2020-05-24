@@ -1,19 +1,21 @@
 from enum import Enum
 import numpy as np
 from tensorflow import convert_to_tensor
-
+import math
 class Colour(Enum):
     RED = 1
     BlUE = 2
 
 class Match():
-    def __init__(self):
+    def __init__(self, match_len):
         #create match array and set all to zero
         self.match_size = 3
         self.env = [[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)]
         #ball amout dictonary
         self.inital_balls = 16
         self.balls = {Colour.BlUE: self.inital_balls, Colour.RED: self.inital_balls}
+        self.match_len = match_len
+        self.current_time = 0
     #get tick tack toe of field
     def _get_ttt(self):
         red_score = 0
@@ -23,7 +25,6 @@ class Match():
             values = []
             for y in range(self.match_size):
                 if any(self.env[x][y]):
-                    print(self.env[x][y])
                     index = np.max(np.nonzero(self.env[x][y]))
                     values.append(self.env[x][y][index])
                 else:
@@ -99,7 +100,7 @@ class Match():
     def add_ball(self, team, x, y):
         if self.balls[team] > 0:
             if not all(self.env[x][y]):
-                env[x][y][np.count_nonzero(env[x][y])] = team
+                self.env[x][y][np.count_nonzero(self.env[x][y])] = team
                 self.balls[team] -= 1
     #remove ball and add back to total balls left   
     def remove_ball(self, x, y):
@@ -132,3 +133,44 @@ class Match():
         observation = np.concatenate((temp_blue.flatten(), temp_red.flatten(), temp_none.flatten()))
         #flatten and merge arrays and convert to tensor for easy uasage
         return observation, reward
+
+    def reset(self):
+        self.env = [[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)]
+        self.balls = {Colour.BlUE: self.inital_balls, Colour.RED: self.inital_balls}
+        observation, _ = self.get_state()
+        self.current_time = 0
+        return observation
+    
+    def step(self, action, action2):
+        
+        if action != 0:
+            action -= 1
+            if action <= 8:
+                x = math.floor(action/3)
+                y = action % 3
+                self.add_ball(Colour.RED, x, y)
+            elif action >= 9:
+                action -= 9
+                x = math.floor(action/3)
+                y = action % 3
+                self.remove_ball(x, y)
+
+        if action2 != 0:
+            action2 -= 1
+            if action2 <= 8:
+                x = math.floor(action2/3)
+                y = action2 % 3
+                self.add_ball(Colour.BlUE, x, y)
+            elif action2 >= 9:
+                action2 -= 9
+                x = math.floor(action2/3)
+                y = action2 % 3
+                self.remove_ball(x, y)
+
+        obs, reward = self.get_state()
+        self.current_time += 1
+        if self.current_time >= self.match_len:
+            return obs, reward, True
+        else:
+            return obs, reward, False
+        
