@@ -16,6 +16,7 @@ class Match():
         self.balls = {Colour.BlUE: self.inital_balls, Colour.RED: self.inital_balls}
         self.match_len = match_len
         self.current_time = 0
+        self.lastreward = 0
     #get tick tack toe of field
     def _get_ttt(self):
         red_score = 0
@@ -135,6 +136,8 @@ class Match():
         return observation, reward
 
     def reset(self):
+        _, data = self.get_state()
+        print(data*64)
         self.env = [[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)]
         self.balls = {Colour.BlUE: self.inital_balls, Colour.RED: self.inital_balls}
         observation, _ = self.get_state()
@@ -169,8 +172,10 @@ class Match():
 
         obs, reward = self.get_state()
         self.current_time += 1
+        truereward = reward - self.lastreward 
+        self.lastreward = reward
         if self.current_time >= self.match_len:
-            return obs, reward, True
+            return obs, truereward, True
         else:
-            return obs, reward, False
+            return obs, truereward, False
         

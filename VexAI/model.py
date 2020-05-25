@@ -8,6 +8,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras import backend as K
 from tensorflow.keras.optimizers import Adam
+import numba as nb
 tensorflow.config.experimental_run_functions_eagerly(True)
 CONTINUOUS = False
 
@@ -19,7 +20,7 @@ NOISE = 1.0 # Exploration noise
 
 GAMMA = 0.99
 
-BUFFER_SIZE = 2048
+BUFFER_SIZE = 200
 BATCH_SIZE = 256
 NUM_ACTIONS = 19
 NUM_STATE = 8
@@ -30,6 +31,9 @@ LR = 1e-4  # Lower lr stabilises training greatly
 
 DUMMY_ACTION, DUMMY_VALUE = np.zeros((1, 19)), np.zeros((1, 1))
 
+@nb.jit
+def exponential_average(old, new, b1):
+    return old * b1 + (1-b1) * new
 
 
 def proximal_policy_optimization_loss(advantage, old_prediction):
@@ -37,7 +41,8 @@ def proximal_policy_optimization_loss(advantage, old_prediction):
         prob = K.sum(y_true * y_pred, axis=-1)
         old_prob = K.sum(y_true * old_prediction, axis=-1)
         r = prob/(old_prob + 1e-10)
-        return -K.mean(K.minimum(r * advantage, K.clip(r, min_value=1 - LOSS_CLIPPING, max_value=1 + LOSS_CLIPPING) * advantage) + ENTROPY_LOSS * -(prob * K.log(prob + 1e-10)))
+        ret = -K.mean(K.minimum(r * advantage, K.clip(r, min_value=1 - LOSS_CLIPPING, max_value=1 + LOSS_CLIPPING) * advantage) + ENTROPY_LOSS * -(prob * K.log(prob + 1e-10)))
+        return ret
     return loss
 
 
@@ -55,6 +60,7 @@ def proximal_policy_optimization_loss_continuous(advantage, old_prediction):
 
         return -K.mean(K.minimum(r * advantage, K.clip(r, min_value=1 - LOSS_CLIPPING, max_value=1 + LOSS_CLIPPING) * advantage))
     return loss
+
 
 
 class Agent:
@@ -86,9 +92,10 @@ class Agent:
 
         model = Model(inputs=[state_input, advantage, old_prediction], outputs=[out_actions])
         model.compile(optimizer=Adam(lr=LR),
-                      loss=[proximal_policy_optimization_loss(
+                      loss=proximal_policy_optimization_loss(
                           advantage=advantage,
-                          old_prediction=old_prediction)])
+                          old_prediction=old_prediction))
+        #model.compile(optimizer=Adam(lr=LR), loss=[pg_loss(advantage)])
         model.summary()
 
         return model
@@ -201,11 +208,10 @@ class Agent:
             pred_values = self.critic.predict(obs)
 
             advantage = reward - pred_values
-
             actor_loss = self.actor.fit([obs, advantage, old_prediction], [action], batch_size=BATCH_SIZE, shuffle=True, epochs=EPOCHS, verbose=False)
             critic_loss = self.critic.fit([obs], [reward], batch_size=BATCH_SIZE, shuffle=True, epochs=EPOCHS, verbose=False)
-            print('Actor Loss: {}'.format(actor_loss.history['loss'][-1]))
-            print('Critic Loss: {}'.format(critic_loss.history['loss'][-1]))
+            print('Actor Loss: {}'.format(actor_loss.history['loss']))
+            print('Critic Loss: {}'.format(critic_loss.history['loss']))
             self.gradient_steps += 1
 
 
