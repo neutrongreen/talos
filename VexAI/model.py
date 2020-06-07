@@ -5,7 +5,7 @@ import numpy as np
 from Envrioment import *
 import tensorflow
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.layers import Input, Dense, LSTM
 from tensorflow.keras import backend as K
 from tensorflow.keras.optimizers import Adam
 import numba as nb
@@ -84,9 +84,9 @@ class Agent:
         advantage = Input(shape=(1,))
         old_prediction = Input(shape=(19,))
 
-        x = Dense(HIDDEN_SIZE, activation='tanh')(state_input)
-        for _ in range(NUM_LAYERS - 1):
-            x = Dense(HIDDEN_SIZE, activation='tanh')(x)
+        x = LSTM(HIDDEN_SIZE, return_sequences=True)
+        for _ in range(NUM_LAYERS):
+            x = Dense(HIDDEN_SIZE, activation='relu')(x)
 
         out_actions = Dense(NUM_ACTIONS, activation='softmax', name='output')(x)
 
@@ -105,8 +105,8 @@ class Agent:
         advantage = Input(shape=(1,))
         old_prediction = Input(shape=(19,))
 
-        x = Dense(HIDDEN_SIZE, activation='relu')(state_input)
-        for _ in range(NUM_LAYERS - 1):
+        x = Dense(81)(state_input)
+        for _ in range(NUM_LAYERS):
             x = Dense(HIDDEN_SIZE, activation='relu')(x)
 
         out_actions = Dense(NUM_ACTIONS, name='output', activation='softmax')(x)
@@ -122,15 +122,14 @@ class Agent:
 
     def build_critic(self):
 
-        state_input = Input(shape=(81,))
-        x = Dense(HIDDEN_SIZE, activation='relu')(state_input)
-        for _ in range(NUM_LAYERS - 1):
+        state_input = Input(shape=(,81))
+        x = LSTM(81, return_sequences=True)(state_input)
+        for _ in range(NUM_LAYERS):
             x = Dense(HIDDEN_SIZE, activation='relu')(x)
         out_value = Dense(1)(x)
 
         model = Model(inputs=[state_input], outputs=[out_value])
         model.compile(optimizer=Adam(lr=LR), loss='mse')
-
         return model
 
     def reset_env(self):

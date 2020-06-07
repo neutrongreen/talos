@@ -113,7 +113,7 @@ class Match():
     def get_state(self):
         red, blue = self.score_match()
         #reward is for red, but can be inverted for blue as it is inverese for blue
-        reward = (red - blue)/64
+        reward = (red - blue)
         
         #convert match into binary arrays for ai to process
         #define temp arrays
@@ -136,8 +136,8 @@ class Match():
         return observation, reward
 
     def reset(self):
+        print(self.score_match())
         _, data = self.get_state()
-        print(data*64)
         self.env = [[[0 for z in range(3)] for y in range(self.match_size)] for x in range(self.match_size)]
         self.balls = {Colour.BlUE: self.inital_balls, Colour.RED: self.inital_balls}
         observation, _ = self.get_state()
@@ -150,11 +150,15 @@ class Match():
             action -= 1
             if action <= 8:
                 x = math.floor(action/3)
+                if x == 3:
+                    x = 2
                 y = action % 3
                 self.add_ball(Colour.RED, x, y)
             elif action >= 9:
                 action -= 9
                 x = math.floor(action/3)
+                if x == 3:
+                    x = 2
                 y = action % 3
                 self.remove_ball(x, y)
 
@@ -162,11 +166,15 @@ class Match():
             action2 -= 1
             if action2 <= 8:
                 x = math.floor(action2/3)
+                if x == 3:
+                    x = 2
                 y = action2 % 3
                 self.add_ball(Colour.BlUE, x, y)
-            elif action2 >= 9:
-                action2 -= 9
+            elif action2 > 8:
+                action2 -= 8
                 x = math.floor(action2/3)
+                if x == 3:
+                    x = 2
                 y = action2 % 3
                 self.remove_ball(x, y)
 
@@ -175,7 +183,7 @@ class Match():
         truereward = reward - self.lastreward 
         self.lastreward = reward
         if self.current_time >= self.match_len:
-            return obs, truereward, True
+            return obs, truereward*2, True
         else:
-            return obs, truereward, False
+            return obs, truereward*2, False
         
