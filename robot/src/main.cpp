@@ -1,14 +1,22 @@
 #include "main.h"
 #include "sensors/sensors.h"
 
+#define MAX_SPEED 200
+
 //define motor objects
 pros::Motor fl_motor(20, false);
 pros::Motor fr_motor(11, true);
 pros::Motor bl_motor(10, false);
 pros::Motor br_motor(1, true);
+
+pros::Motor inl_motor(5, true);
+pros::Motor inr_motor(6, false);
+pros::Motor belt_motor(7, false);
+pros::Motor flywheel_motor(8, false);
 //define mater CONTROLLER_MASTER
 pros::Controller master(CONTROLLER_MASTER);
 
+pros::Motor* motors[8] = {&fl_motor, &fr_motor, &bl_motor, &br_motor,  &inl_motor,  &inr_motor, &belt_motor, &flywheel_motor};
 
 //define program states
 enum  program_states{
@@ -48,15 +56,15 @@ void initialize() {
 	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
+  motors[7]->set_gearing(pros::E_MOTOR_GEARSET_06);
+  for(int i = 0; i < 8; i++){
+    motors[i]->set_encoder_units(pros::E_MOTOR_ENCODER_ROTATIONS);
+    motors[i]->tare_position();
+    motors[i]->set_voltage_limit(10800);
+    motors[i]->set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+  }
 
-  fl_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
-  bl_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
-  fr_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
-  br_motor.set_encoder_units(MOTOR_ENCODER_ROTATIONS);
-  fl_motor.tare_position();
-  bl_motor.tare_position();
-  fr_motor.tare_position();
-  br_motor.tare_position();
+
 }
 
 /**
@@ -88,7 +96,21 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+  flywheel_motor.move_velocity(190*3);
+  fl_motor.move_relative(1, 100);
+  fr_motor.move_relative(1, 100);
+  bl_motor.move_relative(1, 100);
+  br_motor.move_relative(1, 100);
+  pros::delay(3000);
+  fl_motor.move_relative(-0.2, 100);
+  fr_motor.move_relative(-0.2, 100);
+  bl_motor.move_relative(-0.2, 100);
+  br_motor.move_relative(-0.2, 100);
+  pros::delay(1000);
+  belt_motor.move_velocity(190);
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -126,14 +148,39 @@ void calabration(){
   br_motor.move_relative(autonrot/2, 100);
 }
 void drive(){
+  bool beltstate = false;
   while(true){
-    int x = master.get_analog(ANALOG_LEFT_X);
-    int y = master.get_analog(ANALOG_LEFT_Y);
-    int turn = master.get_analog(ANALOG_RIGHT_X);
-    fl_motor =  y + turn + x;
-    bl_motor =  y + turn - x;
-    fr_motor =  y - turn - x;
-    br_motor =  y - turn + x;
+    int x = (int)(((float)master.get_analog(ANALOG_LEFT_X)/128)*MAX_SPEED);
+    int y = (int)(((float)master.get_analog(ANALOG_LEFT_Y)/128)*MAX_SPEED);
+    int turn = (int)(((float)master.get_analog(ANALOG_RIGHT_X)/128)*MAX_SPEED);
+
+    int intake = (master.get_digital(DIGITAL_L1)-master.get_digital(DIGITAL_L2))*MAX_SPEED;
+    int flywheel = (master.get_digital(DIGITAL_R1)-master.get_digital(DIGITAL_R2))*MAX_SPEED;
+    if(master.get_digital_new_press(DIGITAL_A)){
+      beltstate = !beltstate;
+    }
+
+    fl_motor.move_velocity(y + turn - x);
+    bl_motor.move_velocity(y + turn + x);
+    fr_motor.move_velocity(y - turn + x);
+    br_motor.move_velocity(y - turn - x);
+    //set motor speeds
+    inl_motor.move_velocity(intake);
+    inr_motor.move_velocity(intake);
+    /*
+    if(beltstate){
+        belt_motor.move_velocity(MAX_SPEED);
+    }
+    else{
+      belt_motor.move_velocity(0);
+    }
+    flywheel_motor.move_velocity(flywheel);
+    */
+    belt_motor.move_velocity(flywheel);
+
+
+
+
     //delay
     pros::delay(20);
   }

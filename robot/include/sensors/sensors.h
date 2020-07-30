@@ -58,7 +58,7 @@ class InNavUnitOdo : public PosSensor{
     //define velocity vector
     Vector2D velocity;
     //overide update postion and reset postion declerations. update postion requres deltatime in ms
-    void update_position(int deltatime);
+    void update_position(double deltatime);
     void reset_position();
   protected:
     //internal navgation unti
