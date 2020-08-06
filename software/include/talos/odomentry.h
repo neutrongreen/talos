@@ -1,12 +1,11 @@
-#ifndef ODOMENTRYH
-
+#ifndef _ODOMENTRYH
+#define _ODOMENTRYH
 //include main
 #include "main.h"
 #include "talos/datatypes.h"
 #include <map>
 #include <vector>
 #include <math.h>
-#include <chrono>
 #define G 9.82
 //define odomentry classes
 class OdomentryBaseClass{
@@ -15,9 +14,7 @@ public:
   Coord pose = Coord(0, 0 ,0);
     //define update drive function returns pose
   Coord update_position();
-protected:
-    //last update time
-  unsigned int last_update_t;
+  uint32_t lasttime = 0;
     //map of linked motors
     //last rotation of motors the map will be equal to the keys of the upper ma
 };
@@ -26,7 +23,7 @@ protected:
 class HolonomicDriveOdo : public OdomentryBaseClass{
   public:
       //define public constructor
-    HolonomicDriveOdo(std::map<std::string, pros::Motor*>* motors, std::vector<std::string> keys = {"fl", "fr", "bl", "br"});
+    HolonomicDriveOdo(std::map<std::string, pros::Motor*> motors, std::vector<std::string> keys = {"fl", "fr", "bl", "br"});
   protected:
     //define config
     std::map<std::string, pros::Motor*> robot_mtrs;
@@ -42,7 +39,7 @@ class HolonomicDriveOdo : public OdomentryBaseClass{
 class MeccanumDriveOdo : public HolonomicDriveOdo{
   public:
     //define fuction overide
-    MeccanumDriveOdo(std::map<std::string, pros::Motor*>* motors, int wheel_separation_width, int wheel_separation_height, double wheel_radius, std::vector<std::string> keys = {"fl", "fr", "bl", "br"});
+    MeccanumDriveOdo(std::map<std::string, pros::Motor*> motors, int wheel_separation_width, int wheel_separation_height, double wheel_radius, std::vector<std::string> keys = {"fl", "fr", "bl", "br"});
     Coord update_position();
   protected:
     //define wheel cosntants
@@ -52,14 +49,32 @@ class MeccanumDriveOdo : public HolonomicDriveOdo{
 
 };
 
+//class for odmentry using imu
 class InvOdomentry : public OdomentryBaseClass{
   public:
+    //constructor
     InvOdomentry(pros::Imu* interal_unit);
+    //untility fuctions
     Coord update_position();
     void reset_sensor();
   protected:
     pros::Imu* navunit;
-    std::chrono::system_clock::time_point lasttime = std::chrono::system_clock::time_point();
     Vector2D velocity = Vector2D(0 ,0);
 };
 #endif
+
+//logs odomentrys fucntions
+class LogOdo{
+  public:
+    //constructor
+    LogOdo(std::map<std::string, OdomentryBaseClass*> odomentry);
+    //log data
+    void log_data();
+    //stop loging
+    void stop_logging();
+  protected:
+    //sesnor storage
+    std::map<std::string, OdomentryBaseClass*> sensors;
+    //FILE
+    FILE* logfile;
+};

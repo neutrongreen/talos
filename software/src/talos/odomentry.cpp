@@ -1,13 +1,13 @@
 #include "talos/odomentry.h"
 
 //define constructor for holonomic drive odomeerty default class
-HolonomicDriveOdo::HolonomicDriveOdo(std::map<std::string, pros::Motor*>* motors, std::vector<std::string> keys){
+HolonomicDriveOdo::HolonomicDriveOdo(std::map<std::string, pros::Motor*> motors, std::vector<std::string> keys){
   //define drive drive_keys
   drive_keys = keys;
   //itterate over vector list
   for(std::string i : drive_keys){
     //get pointer to motor
-    robot_mtrs[i] = (*motors)[i];
+    robot_mtrs[i] = motors[i];
     //create lastrot entry with current wheel positon should be zero but adds security
     last_rot[i] = robot_mtrs[i]->get_position();
   }
@@ -21,7 +21,7 @@ double HolonomicDriveOdo::get_rot_change(std::string motor){
 }
 
 //very very long fuction definition calling base bonstruction and setting a few custom values
-MeccanumDriveOdo::MeccanumDriveOdo(std::map<std::string, pros::Motor*>* motors, int wheel_separation_width, int wheel_separation_height, double wheel_radius, std::vector<std::string> keys):HolonomicDriveOdo(motors, keys){
+MeccanumDriveOdo::MeccanumDriveOdo(std::map<std::string, pros::Motor*> motors, int wheel_separation_width, int wheel_separation_height, double wheel_radius, std::vector<std::string> keys) : HolonomicDriveOdo(motors, keys){
   separation_width = wheel_separation_width;
   separation_height = wheel_separation_height;
   radius = wheel_radius;
@@ -29,12 +29,13 @@ MeccanumDriveOdo::MeccanumDriveOdo(std::map<std::string, pros::Motor*>* motors, 
 
 //usign equasions found http://robotsforroboticists.com/drive-kinematics/
 Coord MeccanumDriveOdo::update_position(){
+  lasttime = pros::millis();
   Vector2D temploc = Vector2D(0, 0);
   //cacluate templocation
-  temploc.x = (get_rot_change(drive_keys[0]) + get_rot_change(drive_keys[1]) + get_rot_change(drive_keys[2]) + get_rot_change(drive_keys[3])) * (radius/4);
-  temploc.y = (-get_rot_change(drive_keys[0]) + get_rot_change(drive_keys[1]) + get_rot_change(drive_keys[2]) - get_rot_change(drive_keys[3])) * (radius/4);
+  temploc.x = (get_rot_change("fl") + get_rot_change("fr") + get_rot_change("bl") + get_rot_change("br")) * (radius/4);
+  temploc.y = (-get_rot_change("fl") + get_rot_change("fr") + get_rot_change("bl") - get_rot_change("br")) * (radius/4);
   //calcualte roation
-  double rot = (-get_rot_change(drive_keys[0]) + get_rot_change(drive_keys[1]) - get_rot_change(drive_keys[2]) + get_rot_change(drive_keys[3])) * (radius/(4 * (separation_width + separation_height)));
+  double rot = (-get_rot_change("fl") + get_rot_change("fr") - get_rot_change("bl") + get_rot_change("br")) * (radius/(4 * (separation_width + separation_height)));
   //rotate by refrence frame
   pose.position += temploc.rotate(-pose.h);
   //change refrence frame
@@ -55,9 +56,9 @@ InvOdomentry::InvOdomentry(pros::Imu* interal_unit){
 
 Coord InvOdomentry::update_position(){
   //get delta time
-  auto currenttime = std::chrono::system_clock::now();
-  auto deltatime = currenttime-lasttime;
-  double deltatimef = deltatime.count();
+  u_int32_t currenttime = pros::millis();
+  u_int32_t deltatime = currenttime-lasttime;
+  long double deltatimef = (long double)deltatime/1000;
   //get rotation
   double rot = navunit->get_yaw();
   //get accelromiter values
@@ -80,4 +81,19 @@ Coord InvOdomentry::update_position(){
   lasttime = currenttime;
   //return pose
   return pose;
+}
+
+LogOdo::LogOdo(std::map<std::string, OdomentryBaseClass*> odomentry){
+  sensors = odomentry;
+}
+
+void LogOdo::log_data(){
+  //if file not open
+  logfile = fopen("/usd/data.txt", "a");
+  if(logfile){
+    for(auto [name, i] : sensors){
+      fprintf(logfile, "%s, %f, %f, %f, %f,\n", name.c_str(), (double)(i->lasttime)/1000, i->pose.h, i->pose.position.x, i->pose.position.y);
+    }
+  }
+  fclose(logfile);
 }

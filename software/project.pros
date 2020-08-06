@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "software",
+        "project_name": "talos",
         "target": "v5",
         "templates": {
             "kernel": {

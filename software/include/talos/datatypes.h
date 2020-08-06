@@ -1,7 +1,7 @@
 #ifndef _DATA_TYPES
 //include cmath
 #include <cmath>
-
+#define _DATA_TYPES
 
 /* end of include guard:  */
 
