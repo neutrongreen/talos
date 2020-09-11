@@ -1,6 +1,6 @@
 #include "main.h"
 #include "talos/control.h"
-#include "talos/config/talos2_config.h"
+#include "talos/config/talos1_config.h"
 /**
  * A callback function for LLEMU's center button.
  *
@@ -25,7 +25,6 @@ void on_center_button() {
 void initialize() {
 	init_motors(motors);
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
 }
@@ -59,7 +58,17 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	//move foward
+	motors["fl"]->move_absolute(-0.5, 100);
+	motors["bl"]->move_absolute(0.5, 100);
+	motors["fr"]->move_absolute(-0.5, 100);
+	motors["br"]->move_absolute(0.5, 100);
+	pros::delay(2000);
+	motors["belt_1"]->move_velocity(600);
+	motors["belt_2"]->move_velocity(600);
+
+}
 
 /*
  * Runs the operator control code. This function will be started in its own task
@@ -75,14 +84,17 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
-
 	while (true) {
 		drive.update_speed();
-
-		motors["belt1"]->move_velocity(600*(master->get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_L2)));
-		motors["belt2"]->move_velocity(600*(master->get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_R2)));
+		motors["belt_1"]->move_velocity(600*(master->get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_L2)));
+		motors["belt_2"]->move_velocity(600*(master->get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_R2)));
+		int intake = 200*((master->get_digital(pros::E_CONTROLLER_DIGITAL_A) - master->get_digital(pros::E_CONTROLLER_DIGITAL_B)));
+		motors["intake_1"]->move_velocity(intake);
+		motors["intake_2"]->move_velocity(intake);
+		ImuPositing->update_position();
+		pros::lcd::print(1, "X: %.2f", ImuPositing->acceleration.x) ;
+		pros::lcd::print(2, "Y: %.2f", ImuPositing->acceleration.y);
+		pros::lcd::print(3, "H: %.2f", ImuPositing->pose.h);
 		pros::delay(20);
 	}
 }

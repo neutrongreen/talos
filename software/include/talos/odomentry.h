@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <math.h>
+
 #define G 9.82
 //define odomentry classes
 class OdomentryBaseClass{
@@ -14,7 +15,7 @@ public:
   Coord pose = Coord(0, 0 ,0);
     //define update drive function returns pose
   Coord update_position();
-  uint32_t lasttime = 0;
+  uint32_t lasttime = pros::millis();
     //map of linked motors
     //last rotation of motors the map will be equal to the keys of the upper ma
 };
@@ -57,9 +58,10 @@ class InvOdomentry : public OdomentryBaseClass{
     //untility fuctions
     Coord update_position();
     void reset_sensor();
+    Vector2D velocity = Vector2D(0 ,0);
+    Vector2D acceleration = Vector2D(0, 0);
   protected:
     pros::Imu* navunit;
-    Vector2D velocity = Vector2D(0 ,0);
 };
 #endif
 

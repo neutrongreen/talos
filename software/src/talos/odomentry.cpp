@@ -66,20 +66,21 @@ Coord InvOdomentry::update_position(){
   //convert and add acllertomer values to velocity, calcauting the net current speed. times by g to convert to m/s^2 and dived by deltatime
   //to get actual velcoity increase
   //need to add deadbanding
-  Vector2D acceleration = Vector2D((accel.x*G)*deltatimef, (accel.y*G)*deltatimef);
+  Vector2D accelvec = Vector2D((floorf((accel.x*10))/10)*G, (floorf((accel.z*10))/10)*G);
   //update coord.
   //rotate accelration to starting refrence
-  acceleration = acceleration.rotate(-rot);
   //convert to displacemd
-  pose.position = velocity*deltatimef + acceleration*0.5*(deltatimef*deltatimef);
+  pose.position = velocity*deltatimef + accelvec*0.5*(deltatimef*deltatimef);
   //set current heading to mearured eaidng\
   //set velocty to accleration times deltatime
-  velocity = acceleration*deltatimef;
+  velocity = accelvec*deltatimef + velocity;
   //set pose rot
   pose.h = rot;
   //set lastitme to current time
   lasttime = currenttime;
   //return pose
+  acceleration = accelvec;
+
   return pose;
 }
 

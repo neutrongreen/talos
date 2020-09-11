@@ -23,11 +23,11 @@ void DriveControlBase::stop_motors(){
 
 void HolonomicDriveControl::update_speed(){
   int x = (int)(((double)drive_controller->get_analog(drive_channels["lx"])/128)*max_drive_rpm);
-  int y = (int)(((double)drive_controller->get_analog(drive_channels["ly"])/128)*max_drive_rpm);
+  int y = ((int)(((double)drive_controller->get_analog(drive_channels["ly"])/128)*max_drive_rpm));
   int h = (int)(((double)drive_controller->get_analog(drive_channels["rx"])/128)*max_drive_rpm);
-  drive_motors["fl"]->move_velocity(y + h + x);
+  drive_motors["fl"]->move_velocity((scale*y) + h + x);
   drive_motors["bl"]->move_velocity(y + h - x);
-  drive_motors["fr"]->move_velocity(y - h - x);
+  drive_motors["fr"]->move_velocity((scale*y) - h - x);
   drive_motors["br"]->move_velocity(y - h + x);
 }
 

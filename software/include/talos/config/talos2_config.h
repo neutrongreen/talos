@@ -10,27 +10,33 @@
 #include <map>
 #include "talos/config/config.h"
 #include "talos/control.h"
-
+#include "talos/odomentry.h"
 //define motors
 std::map<std::string, pros::Motor*> motors =
 {
   {
-    "fl", new pros::Motor(1, false)
+    "fl", new pros::Motor(11, false)
   },
   {
-    "fr", new pros::Motor(10, true)
+    "fr", new pros::Motor(1, true)
   },
   {
     "bl", new pros::Motor(20, false)
   },
   {
-    "br", new pros::Motor(11, true)
+    "br", new pros::Motor(10, true)
   },
   {
-    "belt1", new pros::Motor(7, true)
+    "belt_1", new pros::Motor(7, true)
   },
   {
-    "belt2", new pros::Motor(8, true)
+    "belt_2", new pros::Motor(8, true)
+  },
+  {
+    "intake_1", new pros::Motor(9, false)
+  },
+  {
+    "intake_2", new pros::Motor(19, true)
   }
 };
 
@@ -58,5 +64,6 @@ pros::Controller* master = new pros::Controller(pros::E_CONTROLLER_MASTER);
 std::vector<std::string> keys = {"fl", "fr", "bl", "br"};
 HolonomicDriveControl drive = HolonomicDriveControl(motors, master, channels, keys, 200);
 
-pros::Imu* navunit = new pros::Imu(5);
+pros::Imu* navunit = new pros::Imu(2);
+InvOdomentry* ImuPositing = new InvOdomentry(navunit);
 #endif
