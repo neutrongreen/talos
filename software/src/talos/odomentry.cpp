@@ -52,6 +52,17 @@ InvOdomentry::InvOdomentry(pros::Imu* interal_unit){
     while(navunit->is_calibrating()){
       pros::delay(20);
     }
+    //calculate offest for inetrial gundance unit over 1 second
+    int sumx = 0;
+    int sumy = 0;
+    for (int i = 0; i < 20; i++){
+        pros::c::imu_gyro_s_t accel = navunit->get_accel();
+        sumx += accel.x;
+        sumy += accel.y;
+        pros::delay(50);
+    }
+    offsetx = sumx/20;
+    offsety = sumy/20;
 }
 
 Coord InvOdomentry::update_position(){
@@ -65,8 +76,21 @@ Coord InvOdomentry::update_position(){
   pros::c::imu_gyro_s_t accel = navunit->get_accel();
   //convert and add acllertomer values to velocity, calcauting the net current speed. times by g to convert to m/s^2 and dived by deltatime
   //to get actual velcoity increase
-  //need to add deadbanding
-  Vector2D accelvec = Vector2D((floorf((accel.x*10))/10)*G, (floorf((accel.z*10))/10)*G);
+  //subtract clareated average offset
+  Vector2D accelvec = Vector2D((accel.x-offsetx)*G, (accel.y-offsety)*G);
+  //insert at start of array
+  buf.insert(buf.begin(), accelvec);
+  buf.resize(bufsize);
+  //shrink buffer to cosnatn bufsize
+  //get average
+  Vector2D sumvec = Vector2D(0, 0);
+  for (Vector2D i : buf){
+    sumvec += i;
+  }
+  accelvec = sumvec/bufsize;
+  //send mps value through kalman filteredControllerInput
+
+
   //update coord.
   //rotate accelration to starting refrence
   //convert to displacemd

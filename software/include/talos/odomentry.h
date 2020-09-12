@@ -62,6 +62,12 @@ class InvOdomentry : public OdomentryBaseClass{
     Vector2D acceleration = Vector2D(0, 0);
   protected:
     pros::Imu* navunit;
+    int offsetx = 0;
+    int offsety = 0;
+
+    //define curiclar buffers
+    std::vector<Vector2D> buf;
+    const int bufsize = 4;
 };
 #endif
 
