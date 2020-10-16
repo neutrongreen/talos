@@ -2,15 +2,56 @@
 #include <math.h>
 #define WHEEL_C 0.3192
 #define MAX_RPM 190
-#define PI 3.14159265
+#define MAX_AUTON_RPM 180
 
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
+//pid constants
+const double kP = 500;
+const double kI = 1;
+const double kD = 0.0001;
+const double deadband = 0.04;
+const double intdeadband = 0.02;
+const double integral_max =20;
+//define displacement variables
+double dx = 0;
+double dy = 0;
+double dh = 0;
+//define velocity varaibles
+double vx = 0;
+double vy = 0;
+//deifne last time measured variable
+
+//define preficals
+pros::Motor fl(10);
+pros::Motor bl(1);
+pros::Motor fr(20, true);
+pros::Motor br(11, true);
+pros::Imu gyro(6);
+pros::Controller master(pros::E_CONTROLLER_MASTER);
 /**
  * A callback function for LLEMU's center button.
  *
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
+//https://stackoverflow.com/questions/9323903/most-efficient-elegant-way-to-clip-a-number
+ double clip(double n, double lower, double upper) {
+   return std::max(lower, std::min(n, upper));
+ }
+
+//define update robot update_position
+ void update_position(double dt){
+	 //calculate robot velocity
+	 vy = (fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() + br.get_actual_velocity())/4;
+	 vx = (-fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() - br.get_actual_velocity())/4;
+	 //convert to meters per seconds
+	 dh = degreesToRadians(gyro.get_heading());
+
+	 vy = (vy/60)*WHEEL_C;
+	 vx = (vx/60)*WHEEL_C;
+	 dx += (vx * cos(-dh) - vy * sin(-dh)) * dt;
+	 dy += (vx * sin(-dh) + vy * cos(-dh)) * dt;
+ }
 void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
@@ -21,6 +62,77 @@ void on_center_button() {
 	}
 }
 
+void move_to_position(double tx, double ty){
+	//t  for target
+	bool at_target = false;
+	//init pid values
+	double integral = 0;
+	double last_error = 0;
+	double time = ((double)pros::millis())/1000;
+	while(!at_target){
+		//get delta time
+		double newtime = ((double)pros::millis())/1000;
+		double dt = newtime-time;
+		time = newtime;
+		//update update_position
+		update_position(dt);
+
+		//calculate offet vector from target
+		double ox = tx-dx;
+		double oy = ty-dy;
+		pros::lcd::print(1, "OX: %f", ox);
+		pros::lcd::print(2, "OY: %f", oy);
+		//convert to robot point of refrience y rotating negative of the robots current angle
+		ox = (ox * cos(-dh) - oy * sin(-dh));
+		oy = (ox * sin(-dh) + oy * cos(-dh));
+		pros::lcd::print(3, "OrX: %f", ox);
+		pros::lcd::print(4, "OrY: %f", oy);
+
+		//get angle of vector from the x axis of the robot
+		double oh = atan2(oy, ox);
+		pros::lcd::print(5, "OH: %f", oh);
+		//pros::lcd::print(3, "oh: %.2f", oh);
+		//calculate mangnatue needed through pid loop
+		//calcualte error/magnatue of vector
+		double error = sqrt((pow(ox, 2) + pow(oy, 2)));
+		pros::lcd::print(6, "error: %f", error);
+		//calculate integral
+		integral += error*dt;
+		//stop integral from overloading
+		if(error < intdeadband){
+			integral = 0;
+		}
+		if(error < deadband){
+			at_target = true;
+		}
+		//limit max integral value
+		integral = clip(integral, -integral_max, integral_max);
+		double deriv = (error-last_error)/dt;
+		last_error = error;
+		double pid_mag = error*kP + integral*kI + deriv*kD;
+		pid_mag = clip(pid_mag, -MAX_AUTON_RPM, MAX_AUTON_RPM);
+		//tahnks https://seamonsters-2605.github.io/archive/mecanum/
+		//speed scale of front left and back right
+		double frbl_speed = sin(oh + M_PI/4) * pid_mag;
+		double flbr_speed = sin(oh - M_PI/4) * pid_mag;
+		//set speed of motors
+		fl.move_velocity((int)round(flbr_speed));
+		br.move_velocity((int)round(flbr_speed));
+		fr.move_velocity((int)round(frbl_speed));
+		bl.move_velocity((int)round(frbl_speed));
+		//detemrien mangantue of speed
+		pros::delay(20);
+	}
+	//stop all motors
+	fl.move_velocity(0);
+	br.move_velocity(0);
+	fr.move_velocity(0);
+	bl.move_velocity(0);
+}
+
+void rotate(double th){
+
+}
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -80,53 +192,38 @@ void autonomous() {}
  */
 void opcontrol() {
 	//estimate horsiontail and vertical velocity of motors
-	double dx = 0;
-	double dy = 0;
-	double dh = 0;
 
-	double vx = 0;
-	double vy = 0;
-
-	pros::Motor fl(10);
-	pros::Motor bl(20);
-	pros::Motor fr(1, true);
-	pros::Motor br(11, true);
-	pros::Imu gyro(6);
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	gyro.reset();
 	pros::delay(200);
 	while(gyro.is_calibrating()){
 		pros::delay(20);
 		master.rumble("-");
 	}
+	/*
+	pros::lcd::print(7, "command: 1");
+	move_to_position(0, 1);
+	pros::lcd::print(7, "command: 2");
+	move_to_position(1, 1);
+	pros::lcd::print(7, "command: 2");
+	move_to_position(0, 0);
+	*/
+
 	double time = ((double)pros::millis())/1000;
 	while (true) {
+		double newtime = ((double)pros::millis())/1000;
+		double dt = newtime-time;
+		time = newtime;
 		//move init_motors
 		int x = (int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)/128)*MAX_RPM);
 	  int y = ((int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)/128)*MAX_RPM));
 	  int h = (int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)/128)*MAX_RPM);
-	  fl.move_velocity(x + h + y);
-	  bl.move_velocity(x + h - y);
-	  fr.move_velocity(x - h - y);
-	  br.move_velocity(x - h + y);
+	  fl.move_velocity(y + h + x);
+	  bl.move_velocity(y + h - x);
+	  fr.move_velocity(y - h - x);
+	  br.move_velocity(y - h + x);
 		//update postion
-		double newtime = ((double)pros::millis())/1000;
-		double dt = newtime-time;
-		time = newtime;
-		//calculate robot velocity
-		vy = (fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() + br.get_actual_velocity())/4;
-		vx = (-fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() - br.get_actual_velocity())/4;
-		//convert to meters per seconds
-		dh = degreesToRadians(gyro.get_heading());
+		update_position(dt);
 
-		vy = (vy/60)*WHEEL_C;
-		vx = (vx/60)*WHEEL_C;
-		dx += (vx * cos(-dh) - vy * sin(-dh)) * dt;
-		dy += (vx * sin(-dh) + vy * cos(-dh)) * dt;
-
-		pros::lcd::print(1, "X: %.2f", dx);
-		pros::lcd::print(2, "y: %.2f", dy);
-		pros::lcd::print(3, "h: %.2f", dh);
 		pros::delay(20);
 	}
 }
