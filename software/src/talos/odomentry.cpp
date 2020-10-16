@@ -28,7 +28,7 @@ MeccanumDriveOdo::MeccanumDriveOdo(std::map<std::string, pros::Motor*> motors, i
 }
 
 //usign equasions found http://robotsforroboticists.com/drive-kinematics/
-Coord MeccanumDriveOdo::update_position(){
+Crd MeccanumDriveOdo::update_position(){
   lasttime = pros::millis();
   Vector2D temploc = Vector2D(0, 0);
   //cacluate templocation
@@ -45,31 +45,45 @@ Coord MeccanumDriveOdo::update_position(){
 }
 
 InvOdomentry::InvOdomentry(pros::Imu* interal_unit){
-    //store refrence to sensor
+    //store rCefrence to sensor
     navunit = interal_unit;
-    navunit->reset();
-    //wait untill calb compleate
-    while(navunit->is_calibrating()){
-      pros::delay(20);
-    }
-    //calculate offest for inetrial gundance unit over 1 second
-    int sumx = 0;
-    int sumy = 0;
-    for (int i = 0; i < 20; i++){
-        pros::c::imu_gyro_s_t accel = navunit->get_accel();
-        sumx += accel.x;
-        sumy += accel.y;
-        pros::delay(50);
-    }
-    offsetx = sumx/20;
-    offsety = sumy/20;
+
+}
+void InvOdomentry::calibrate(){
+  //reset navunit
+  navunit->reset();
+  //wait unit done reseting
+  while(navunit->is_calibrating()){
+    pros::delay(200);
+  }
+
+  double sumx = 0;
+  double sumy = 0;
+  //wait unill below infinty
+  while(navunit->get_accel().x > 4 || navunit->get_accel().x < -4){
+    pros::delay(20);
+  }
+  //get average value
+  for(int i = 0; i < 20; i++){
+    pros::c::imu_gyro_s_t accel = navunit->get_accel();
+
+    sumx += accel.x;
+    sumy += accel.y;
+    pros::lcd::print(1, "X: %.2f", accel.x);
+    pros::lcd::print(2, "Y: %.2f", accel.y);
+    pros::delay(50);
+  }
+  offsetx = sumx/20;
+  offsety = sumy/20;
 }
 
-Coord InvOdomentry::update_position(){
+
+Crd InvOdomentry::update_position(){
   //get delta time
+
   u_int32_t currenttime = pros::millis();
   u_int32_t deltatime = currenttime-lasttime;
-  long double deltatimef = (long double)deltatime/1000;
+  double deltatimef = (double)(deltatime)/1000;
   //get rotation
   double rot = navunit->get_yaw();
   //get accelromiter values
@@ -77,24 +91,25 @@ Coord InvOdomentry::update_position(){
   //convert and add acllertomer values to velocity, calcauting the net current speed. times by g to convert to m/s^2 and dived by deltatime
   //to get actual velcoity increase
   //subtract clareated average offset
-  Vector2D accelvec = Vector2D((accel.x-offsetx)*G, (accel.y-offsety)*G);
+  Vector2D accelvec = Vector2D(accel.x-offsetx, accel.y-offsety)*G;
   //insert at start of array
-  buf.insert(buf.begin(), accelvec);
-  buf.resize(bufsize);
+  //buf.insert(buf.begin(), accelvec);
+  //buf.resize(bufsize);
   //shrink buffer to cosnatn bufsize
   //get average
-  Vector2D sumvec = Vector2D(0, 0);
-  for (Vector2D i : buf){
-    sumvec += i;
-  }
-  accelvec = sumvec/bufsize;
+  //Vector2D sumvec = Vector2D(0, 0);
+  //for (Vector2D i : buf){
+    //sumvec += i;
+  //}
+  //accelvec = sumvec/bufsize;
   //send mps value through kalman filteredControllerInput
 
 
-  //update coord.
+  //update Crd.
   //rotate accelration to starting refrence
   //convert to displacemd
-  pose.position = velocity*deltatimef + accelvec*0.5*(deltatimef*deltatimef);
+
+  pose.position = velocity*deltatimef + (accelvec*0.5)*(deltatimef*deltatimef);
   //set current heading to mearured eaidng\
   //set velocty to accleration times deltatime
   velocity = accelvec*deltatimef + velocity;
@@ -103,6 +118,7 @@ Coord InvOdomentry::update_position(){
   //set lastitme to current time
   lasttime = currenttime;
   //return pose
+
   acceleration = accelvec;
 
   return pose;

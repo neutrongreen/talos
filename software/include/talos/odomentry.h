@@ -12,9 +12,9 @@
 class OdomentryBaseClass{
 public:
   //define cooords for predicted positions
-  Coord pose = Coord(0, 0 ,0);
+  Crd pose = Crd(0, 0, 0);
     //define update drive function returns pose
-  Coord update_position();
+  Crd update_position();
   uint32_t lasttime = pros::millis();
     //map of linked motors
     //last rotation of motors the map will be equal to the keys of the upper ma
@@ -41,7 +41,7 @@ class MeccanumDriveOdo : public HolonomicDriveOdo{
   public:
     //define fuction overide
     MeccanumDriveOdo(std::map<std::string, pros::Motor*> motors, int wheel_separation_width, int wheel_separation_height, double wheel_radius, std::vector<std::string> keys = {"fl", "fr", "bl", "br"});
-    Coord update_position();
+    Crd update_position();
   protected:
     //define wheel cosntants
     int separation_width = 0;
@@ -56,15 +56,16 @@ class InvOdomentry : public OdomentryBaseClass{
     //constructor
     InvOdomentry(pros::Imu* interal_unit);
     //untility fuctions
-    Coord update_position();
+    Crd update_position();
     void reset_sensor();
+    void calibrate();
     Vector2D velocity = Vector2D(0 ,0);
     Vector2D acceleration = Vector2D(0, 0);
-  protected:
     pros::Imu* navunit;
-    int offsetx = 0;
-    int offsety = 0;
-
+    double offsetx = 0;
+    double offsety = 0;
+    okapi::EKFFilter x_filter = okapi::EKFFilter();
+    okapi::EKFFilter y_filter = okapi::EKFFilter();
     //define curiclar buffers
     std::vector<Vector2D> buf;
     const int bufsize = 4;

@@ -16,16 +16,16 @@
 std::map<std::string, pros::Motor*> motors =
 {
   {
-    "fl", new pros::Motor(1, false)
+    "fl", new pros::Motor(1, true)
   },
   {
-    "fr", new pros::Motor(10, true)
+    "fr", new pros::Motor(10, false)
   },
   {
-    "bl", new pros::Motor(20, false)
+    "bl", new pros::Motor(20, true)
   },
   {
-    "br", new pros::Motor(11, true)
+    "br", new pros::Motor(11, false)
   },
   {
     "belt_1", new pros::Motor(7, true)
@@ -66,6 +66,6 @@ std::vector<std::string> keys = {"fl", "fr", "bl", "br"};
 HolonomicDriveControl drive = HolonomicDriveControl(motors, master, channels, keys, 200, -1);
 
 //define navigation
-pros::Imu* navunit = new pros::Imu(2);
-InvOdomentry* ImuPositing = new InvOdomentry(navunit);
+//pros::Imu* navunit = new pros::Imu(2);
+//InvOdomentry* ImuPositing = new InvOdomentry(navunit);
 #endif

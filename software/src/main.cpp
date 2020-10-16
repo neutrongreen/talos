@@ -22,11 +22,11 @@ void on_center_button() {
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-void initialize() {
-	init_motors(motors);
+void initialize(){
 	pros::lcd::initialize();
-
 	pros::lcd::register_btn1_cb(on_center_button);
+	init_motors(motors);
+	//ImuPositing->calibrate();
 }
 
 /**
@@ -91,10 +91,11 @@ void opcontrol() {
 		int intake = 200*((master->get_digital(pros::E_CONTROLLER_DIGITAL_A) - master->get_digital(pros::E_CONTROLLER_DIGITAL_B)));
 		motors["intake_1"]->move_velocity(intake);
 		motors["intake_2"]->move_velocity(intake);
-		ImuPositing->update_position();
-		pros::lcd::print(1, "X: %.2f", ImuPositing->acceleration.x) ;
-		pros::lcd::print(2, "Y: %.2f", ImuPositing->acceleration.y);
-		pros::lcd::print(3, "H: %.2f", ImuPositing->pose.h);
-		pros::delay(20);
+		//ImuPositing->update_position();
+
+		//pros::lcd::print(1, "X: %.2f", ImuPositing->velocity.x);
+		//pros::lcd::print(2, "Y: %.2f", ImuPositing->velocity.y);
+		//pros::lcd::print(3, "H: %.2f", ImuPositing->pose.h);
+		pros::delay(50);
 	}
 }
