@@ -43,7 +43,7 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
  void update_position(double dt){
 	 //calculate robot velocity
 	 vy = (fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() + br.get_actual_velocity())/4;
-	 vx = (-fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() - br.get_actual_velocity())/4;
+	 vx = -(-fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() - br.get_actual_velocity())/4;
 	 //convert to meters per seconds
 	 dh = degreesToRadians(gyro.get_heading());
 
@@ -113,8 +113,8 @@ void move_to_position(double tx, double ty){
 		pid_mag = clip(pid_mag, -MAX_AUTON_RPM, MAX_AUTON_RPM);
 		//tahnks https://seamonsters-2605.github.io/archive/mecanum/
 		//speed scale of front left and back right
-		double frbl_speed = sin(oh + M_PI/4) * pid_mag;
-		double flbr_speed = sin(oh - M_PI/4) * pid_mag;
+		double flbr_speed = sin(oh + M_PI/4) * pid_mag;
+		double frbl_speed = sin(oh - M_PI/4) * pid_mag;
 		//set speed of motors
 		fl.move_velocity((int)round(flbr_speed));
 		br.move_velocity((int)round(flbr_speed));
