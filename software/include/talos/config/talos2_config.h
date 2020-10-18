@@ -27,7 +27,7 @@ std::map<std::string, pros::Motor*> motors =
     "br", new pros::Motor(10, true)
   },
   {
-    "belt_1", new pros::Motor(7, true)
+    "belt_1", new pros::Motor(7)
   },
   {
     "belt_2", new pros::Motor(8, true)

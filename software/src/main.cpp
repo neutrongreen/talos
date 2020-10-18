@@ -1,6 +1,6 @@
 #include "main.h"
 #include "talos/control.h"
-#include "talos/config/talos1_config.h"
+#include "talos/config/talos2_config.h"
 /**
  * A callback function for LLEMU's center button.
  *
@@ -60,10 +60,10 @@ void competition_initialize() {}
  */
 void autonomous() {
 	//move foward
-	motors["fl"]->move_absolute(-0.5, 100);
-	motors["bl"]->move_absolute(0.5, 100);
-	motors["fr"]->move_absolute(-0.5, 100);
-	motors["br"]->move_absolute(0.5, 100);
+	motors["fl"]->move_absolute(1, 100);
+	motors["bl"]->move_absolute(1, 100);
+	motors["fr"]->move_absolute(1, 100);
+	motors["br"]->move_absolute(1, 100);
 	pros::delay(2000);
 	motors["belt_1"]->move_velocity(600);
 	motors["belt_2"]->move_velocity(600);
@@ -86,8 +86,8 @@ void autonomous() {
 void opcontrol() {
 	while (true) {
 		drive.update_speed();
-		motors["belt_1"]->move_velocity(600*(master->get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_L2)));
-		motors["belt_2"]->move_velocity(600*(master->get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_R2)));
+		motors["belt_1"]->move_velocity(200*(master->get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_L2)));
+		motors["belt_2"]->move_velocity(200*(master->get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master->get_digital(pros::E_CONTROLLER_DIGITAL_R2)));
 		int intake = 200*((master->get_digital(pros::E_CONTROLLER_DIGITAL_A) - master->get_digital(pros::E_CONTROLLER_DIGITAL_B)));
 		motors["intake_1"]->move_velocity(intake);
 		motors["intake_2"]->move_velocity(intake);
