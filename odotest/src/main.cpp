@@ -78,8 +78,11 @@ void update_position_x(double dt){
   vy =  v1 + v2;
   vx = v1 - v2;
   //convert to meters per seconds
-  dh = degreesToRadians(gyro.get_heading());
-
+  dh = gyro.get_heading();
+  if (dh < 0){
+    dh += 360;
+  }
+  dh = degreesToRadians(dh);
   vy = (vy/60)*WHEEL_C;
   vx = (vx/60)*WHEEL_C;
   dx += (vx * cos(-dh) - vy * sin(-dh)) * dt;
@@ -108,13 +111,15 @@ void move_to_position(double tx, double ty){
 		pros::lcd::print(1, "OX: %f", ox);
 		pros::lcd::print(2, "OY: %f", oy);
 		//convert to robot point of refrience y rotating negative of the robots current angle
-		ox = (ox * cos(-dh) - oy * sin(-dh));
-		oy = (ox * sin(-dh) + oy * cos(-dh));
 		pros::lcd::print(3, "OrX: %f", ox);
 		pros::lcd::print(4, "OrY: %f", oy);
 
 		//get angle of vector from the x axis of the robot
 		double oh = atan2(oy, ox);
+    if (oh < 0){
+      oh += M_PI_2;
+    }
+    oh -= dh;
 		pros::lcd::print(5, "OH: %f", oh);
 		//pros::lcd::print(3, "oh: %.2f", oh);
 		//calculate mangnatue needed through pid loop
@@ -133,7 +138,7 @@ void move_to_position(double tx, double ty){
 		//limit max integral value
 		integral = clip(integral, -integral_max, integral_max);
 		double deriv = (error-last_error)/dt;
-		last_error = error;
+    last_error = error;
 		double pid_mag = error*kP + integral*kI + deriv*kD;
 		pid_mag = clip(pid_mag, -MAX_AUTON_RPM, MAX_AUTON_RPM);
 		//tahnks https://seamonsters-2605.github.io/archive/mecanum/
