@@ -1,11 +1,12 @@
 #include "main.h"
 #include <math.h>
 #define WHEEL_C 0.3192
-#define MAX_RPM 190
-#define MAX_AUTON_RPM 180
+#define MAX_RPM 200
+#define MAX_AUTON_RPM 200
 
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
 #define radiansToDegrees(angleRad) (angleRad / (M_PI / 180.0))
+#define ROT_CONST sin(degreesToRadians(45))
 //pid constants
 const double kP = 500;
 const double kI = 1;
@@ -14,12 +15,12 @@ const double deadband = 0.02;
 const double intdeadband = 0.02;
 const double integral_max =20;
 
-const double rot_kP = 100;
-const double rot_kI = 10;
-const double rot_kD = 0.0;
-const double rot_deadband = degreesToRadians(0.1);
-const double rot_intdeadband = degreesToRadians(0.1);
-const double rot_integral_max = 40;
+const double rot_kP = 5;
+const double rot_kI = 4;
+const double rot_kD = 3;
+const double rot_deadband = degreesToRadians(0.2);
+const double rot_intdeadband = degreesToRadians(0.2);
+const double rot_integral_max = 100;
 //define displacement variables
 double dx = 0;
 double dy = 0;
@@ -70,6 +71,21 @@ void on_center_button() {
 		pros::lcd::clear_line(2);
 	}
 }
+void update_position_x(double dt){
+  //calculate robot velocity
+  double v1 = ((fl.get_actual_velocity() + br.get_actual_velocity())/2) * ROT_CONST;
+  double v2 = ((fr.get_actual_velocity() + bl.get_actual_velocity())/2) * ROT_CONST;
+  vy =  v1 + v2;
+  vx = v1 - v2;
+  //convert to meters per seconds
+  dh = degreesToRadians(gyro.get_heading());
+
+  vy = (vy/60)*WHEEL_C;
+  vx = (vx/60)*WHEEL_C;
+  dx += (vx * cos(-dh) - vy * sin(-dh)) * dt;
+  dy += (vx * sin(-dh) + vy * cos(-dh)) * dt;
+}
+
 
 void move_to_position(double tx, double ty){
 	//t  for target
@@ -241,7 +257,16 @@ void autonomous() {
   move_to_position(0, 0);
   */
   //move_rotate(180);
-  move_to_position(0, 0.20);
+  move_to_position(0, -0.44);
+  move_to_position(-0.74, -0.44);
+  move_to_position(-0.74, -0.24);
+  in.move_velocity(200);
+  pros::delay(1000);
+  in.move_velocity(0);
+  move_to_position(-0.74, -0.44);
+  move_to_position(0.74, -0.44);
+  move_rotate(45);
+  move_to_position(0.80, -0.34);
   in.move_velocity(200);
 }
 
