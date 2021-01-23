@@ -2,6 +2,7 @@
 #include "main.h"
 #include <math.h>
 #include "talos.h"
+#include "auton_select.h"
 //deifne last time measured variable
 
 //define preficals
@@ -27,6 +28,8 @@ void initialize() {
     pros::delay(20);
     master.rumble("-");
   }
+	init();
+	gui_init(0);
 }
 
 /**
