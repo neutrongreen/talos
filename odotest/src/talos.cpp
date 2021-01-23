@@ -8,10 +8,15 @@ double dh = 0;
 double vx = 0;
 double vy = 0;
 
+
+void (*update_position)(double);
+
 double clip(double n, double lower, double upper) {
   return std::max(lower, std::min(n, upper));
 }
-/*
+
+
+
 void update_position_x(double dt){
   //calculate robot velocity
   double v1 = ((fl.get_actual_velocity() + br.get_actual_velocity())/2) * ROT_CONST;
@@ -29,10 +34,10 @@ void update_position_x(double dt){
   dx += (vx * cos(-dh) - vy * sin(-dh)) * dt;
   dy += (vx * sin(-dh) + vy * cos(-dh)) * dt;
 }
-*/
+
 
 //update the robots postion
-void update_position(double dt){
+void update_position_hol(double dt){
   //calculate robot velocity
   vy = (fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() + br.get_actual_velocity())/4;
   vx = -(-fl.get_actual_velocity() + fr.get_actual_velocity() + bl.get_actual_velocity() - br.get_actual_velocity())/4;
@@ -163,4 +168,20 @@ void move_rotate(double th){
   br.move_velocity(0);
   fr.move_velocity(0);
   bl.move_velocity(0);
+}
+
+void init(){
+  if(drive_type == 1){
+    update_position = &update_position_x;
+  }
+  else if (drive_type == 0){
+    update_position = &update_position_hol;
+  }
+
+  dx = 0;
+  dy = 0;
+  dh = 0;
+  //define velocity varaibles
+  vx = 0;
+  vy = 0;
 }

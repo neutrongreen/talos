@@ -23,6 +23,7 @@ const double rot_deadband = degreesToRadians(0.2);
 const double rot_intdeadband = degreesToRadians(0.2);
 const double rot_integral_max = 100;
 
+const int drive_type = 1;
 #else
 pros::Motor fl = pros::Motor(10);
 pros::Motor bl = pros::Motor(1);
@@ -46,4 +47,5 @@ const double rot_deadband = degreesToRadians(0.2);
 const double rot_intdeadband = degreesToRadians(0.2);
 const double rot_integral_max = 100;
 
+const int drive_type = 0;
 #endif

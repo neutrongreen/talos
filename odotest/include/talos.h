@@ -1,6 +1,7 @@
 #ifndef _TALOS_CONTROL_
 #define _TALOS_CONTROL_
-
+//define alteriave config
+#define _OV_CONFIG_
 #include "api.h"
 #include "config.h"
 //define postion variables
@@ -14,6 +15,8 @@ extern double vy;
 //define fuctions
 void move_to_position(double tx, double ty);
 void move_rotate(double th);
-void update_position(double dt);
+extern void (*update_position)(double);
+void init();
+
 
 #endif

@@ -33,4 +33,8 @@ extern const double rot_deadband;
 extern const double rot_intdeadband;
 extern const double rot_integral_max;
 
+//0 is holonomic
+//1 is x drive
+extern const int drive_type;
+
 #endif
