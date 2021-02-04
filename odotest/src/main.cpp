@@ -111,7 +111,7 @@ void autonomous() {
  */
 void opcontrol() {
 	//estimate horsiontail and vertical velocity of motors
-
+	int old_roll = 0;
 
 	double time = ((double)pros::millis())/1000;
 	while (true) {
@@ -119,22 +119,24 @@ void opcontrol() {
 		double dt = newtime-time;
 		time = newtime;
 		//move init_motors
-		int x = (int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)/128)*MAX_RPM);
-	  int y = ((int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)/128)*MAX_RPM));
-	  int h = (int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)/128)*MAX_RPM);
+		double x = (((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)/128));
+	  double y = (((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)/128));
+	  double h = (((double)master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)/128));
 		#ifdef _OV_CONFIG_
 		h = -h;
+		#else
+		int lr_ov = master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN) - master.get_digital(pros::E_CONTROLLER_DIGITAL_B);
+		x = lr_ov ? lr_ov : x;
 		#endif
-
     int left = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 		int right = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
 		int overide = master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT) - master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
 
 
-	  fl.move_velocity(y + h + x);
-	  bl.move_velocity(y + h - x);
-	  fr.move_velocity(y - h - x);
-	  br.move_velocity(y - h + x);
+	  fl.move_velocity((y + h + x)*MAX_RPM);
+	  bl.move_velocity((y + h - x)*MAX_RPM);
+	  fr.move_velocity((y - h - x)*MAX_RPM);
+	  br.move_velocity((y - h + x)*MAX_RPM);
     //in.move_velocity(intake);
 		//update
 		#ifdef _OV_CONFIG_
@@ -146,8 +148,18 @@ void opcontrol() {
 		#else
 		roll1.move_velocity(200*(-right));
 		int bw = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
-		in1.move_velocity((1 - bw*0.7)*200*(left));
-		in2.move_velocity((1 - bw*0.7)*200*(-left));
+		int ov_roll = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
+		if (!ov_roll){
+			in1.move_velocity((1 - bw*0.7)*200*(left));
+			in2.move_velocity((1 - bw*0.7)*200*(-left));
+		}
+		else if(ov_roll %% old_roll == 0){
+			in1.move_relative(-0.1);
+			in1.move_relative(0.1);
+		}
+		old_roll = ov_roll;
+
+
 		#endif
 		update_position(dt);
 		pros::lcd::print(1, "DX: %f", dx);
