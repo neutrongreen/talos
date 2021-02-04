@@ -1,7 +1,7 @@
 #ifndef _TALOS_CONTROL_
 #define _TALOS_CONTROL_
 //define alteriave config
-#define _OV_CONFIG_
+
 #include "api.h"
 #include "config.h"
 //define postion variables

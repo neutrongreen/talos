@@ -1,21 +1,30 @@
+#define _OV_CONFIG_
 #ifndef _TALOS_CONFIG_
 #define _TALOS_CONFIG_
 #include "api.h"
 //Overide Config
 //default config
 #define ROT_CONST sin(degreesToRadians(45))
-#define WHEEL_C 0.3192
+
 #define MAX_RPM 200
 #define MAX_AUTON_RPM 200
 
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
 #define radiansToDegrees(angleRad) (angleRad / (M_PI / 180.0))
 
+extern const double WHEEL_C;
+
 extern pros::Motor fl;
 extern pros::Motor bl;
 extern pros::Motor fr;
 extern pros::Motor br;
-extern pros::Motor in;
+
+extern pros::Motor roll1;
+extern pros::Motor roll2;
+
+extern pros::Motor in1;
+extern pros::Motor in2;
+
 extern pros::Imu gyro;
 extern pros::Controller master;
 

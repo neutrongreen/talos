@@ -21,17 +21,15 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
+	init();
+	gui_init(0);
   gyro.reset();
   pros::delay(200);
   while(gyro.is_calibrating()){
     pros::delay(20);
     master.rumble("-");
   }
-	init();
-	gui_init(0);
 }
-
 /**
  * Runs while the robot is in the disabled state of Field Management System or
  * the VEX Competition Switch, following either autonomous or opcontrol. When
@@ -63,6 +61,14 @@ void competition_initialize() {}
  */
 void autonomous() {
   //test autonomous
+	auton_id = 2;
+	int side = 0;
+	if (auton_side == 0){
+		side = 1;
+	}
+	else {
+		side = -1;
+	}
   /*
   pros::lcd::print(7, "command: 1");
   move_to_position(0, 1);
@@ -72,17 +78,22 @@ void autonomous() {
   move_to_position(0, 0);
   */
   //move_rotate(180);
-  move_to_position(0, -0.44);
-  move_to_position(-0.74, -0.44);
-  move_to_position(-0.74, -0.24);
-  in.move_velocity(200);
-  pros::delay(1000);
-  in.move_velocity(0);
-  move_to_position(-0.74, -0.44);
-  move_to_position(0.74, -0.44);
-  move_rotate(45);
-  move_to_position(0.80, -0.34);
-  in.move_velocity(200);
+	//test auton
+
+	switch (auton_id) {
+		case 1:
+			roll1.move_velocity(-200);
+			roll1.move_velocity(-600);
+		case 2:
+			move_to_position(0.0, -0.4);
+			move_to_position(side * -0.8, -0.4);
+
+			move_to_position(side * 0.6, -0.4);
+			move_rotate(side * 45);
+			move_to_position(side * 0.82, -0.22);
+	}
+
+	//move_to_position(1, 0);
 }
 
 /**
@@ -111,15 +122,40 @@ void opcontrol() {
 		int x = (int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)/128)*MAX_RPM);
 	  int y = ((int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)/128)*MAX_RPM));
 	  int h = (int)(((double)master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)/128)*MAX_RPM);
-    int intake = MAX_RPM*((master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)));
+		#ifdef _OV_CONFIG_
+		h = -h;
+		#endif
+
+    int left = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
+		int right = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+		int overide = master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT) - master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
+
+
 	  fl.move_velocity(y + h + x);
 	  bl.move_velocity(y + h - x);
 	  fr.move_velocity(y - h - x);
 	  br.move_velocity(y - h + x);
-    in.move_velocity(intake);
-		//update postion
-		update_position(dt);
+    //in.move_velocity(intake);
+		//update
+		#ifdef _OV_CONFIG_
+		roll1.move_velocity(200*(left ? left : overide));
+		roll2.move_velocity(600*(left ? left : -abs(overide)));
 
+		in1.move_velocity(200*(right ? right : overide));
+		in2.move_velocity(200*(right ? right : overide));
+		#else
+		roll1.move_velocity(200*(-right));
+		int bw = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
+		in1.move_velocity((1 - bw*0.7)*200*(left));
+		in2.move_velocity((1 - bw*0.7)*200*(-left));
+		#endif
+		update_position(dt);
+		pros::lcd::print(1, "DX: %f", dx);
+		pros::lcd::print(2, "DY: %f", dy);
+		//convert to robot point of refrience y rotating negative of the robots current angle
+		pros::lcd::print(3, "VX: %f", vx);
+		pros::lcd::print(4, "VY: %f", vy);
+		pros::lcd::print(2, "DH: %f",  radiansToDegrees(dh));
 		pros::delay(20);
 	}
 }

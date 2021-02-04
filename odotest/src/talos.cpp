@@ -24,11 +24,8 @@ void update_position_x(double dt){
   vy =  v1 + v2;
   vx = v1 - v2;
   //convert to meters per seconds
-  dh = gyro.get_heading();
-  if (dh < 0){
-    dh += 360;
-  }
-  dh = degreesToRadians(dh);
+  dh = -degreesToRadians(gyro.get_heading());
+
   vy = (vy/60)*WHEEL_C;
   vx = (vx/60)*WHEEL_C;
   dx += (vx * cos(-dh) - vy * sin(-dh)) * dt;
@@ -77,10 +74,12 @@ void move_to_position(double tx, double ty){
 
 		//get angle of vector from the x axis of the robot
 		double oh = atan2(oy, ox);
+    /*
     if (oh < 0){
       oh += M_PI_2;
     }
-    oh -= dh;
+    */
+    oh += dh;
 		pros::lcd::print(5, "OH: %f", oh);
 		//pros::lcd::print(3, "oh: %.2f", oh);
 		//calculate mangnatue needed through pid loop
@@ -104,8 +103,10 @@ void move_to_position(double tx, double ty){
 		pid_mag = clip(pid_mag, -MAX_AUTON_RPM, MAX_AUTON_RPM);
 		//tahnks https://seamonsters-2605.github.io/archive/mecanum/
 		//speed scale of front left and back right
-		int flbr_speed = (int)round(sin(oh + M_PI/4) * pid_mag);
-		int frbl_speed = (int)round(sin(oh - M_PI/4) * pid_mag);
+
+    int flbr_speed = (int)round(sin(oh + M_PI/4) * pid_mag);
+    int frbl_speed = (int)round(sin(oh - M_PI/4) * pid_mag);
+
 		//set speed of motors
 		fl.move_velocity(flbr_speed);
 		br.move_velocity(flbr_speed);
@@ -125,6 +126,9 @@ void move_to_position(double tx, double ty){
 //rotate robot
 void move_rotate(double th){
   //t  for target
+  #ifdef _OV_CONFIG_
+  th = -th;
+  #endif
   th = degreesToRadians(th);
   bool at_target = false;
   //init pid values
