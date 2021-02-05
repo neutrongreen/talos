@@ -82,9 +82,11 @@ void autonomous() {
 	switch (auton_id) {
 		case 1:
 		#ifdef _OV_CONFIG_
+		move_to_position(0, 0.2);
 		roll1.move_velocity(600);
 		roll2.move_velocity(200);
 		#else
+		move_to_position(0, 0.2);
 		roll1.move_velocity(200);
 		#endif
 		/*
