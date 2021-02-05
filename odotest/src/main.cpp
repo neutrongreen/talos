@@ -61,7 +61,6 @@ void competition_initialize() {}
  */
 void autonomous() {
   //test autonomous
-	auton_id = 2;
 	int side = 0;
 	if (auton_side == 0){
 		side = 1;
@@ -82,8 +81,13 @@ void autonomous() {
 
 	switch (auton_id) {
 		case 1:
-			roll1.move_velocity(-200);
-			roll1.move_velocity(-600);
+		#ifdef _OV_CONFIG_
+		roll1.move_velocity(600);
+		roll2.move_velocity(200);
+		#else
+		roll1.move_velocity(200);
+		#endif
+		/*
 		case 2:
 			move_to_position(0.0, -0.4);
 			move_to_position(side * -0.8, -0.4);
@@ -92,8 +96,9 @@ void autonomous() {
 			move_rotate(side * 45);
 			move_to_position(side * 0.82, -0.22);
 	}
-
+	*/
 	//move_to_position(1, 0);
+	}
 }
 
 /**
@@ -146,16 +151,16 @@ void opcontrol() {
 		in1.move_velocity(200*(right ? right : overide));
 		in2.move_velocity(200*(right ? right : overide));
 		#else
-		roll1.move_velocity(200*(-right));
+		roll1.move_velocity(200*(right));
 		int bw = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 		int ov_roll = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
 		if (!ov_roll){
 			in1.move_velocity((1 - bw*0.7)*200*(left));
 			in2.move_velocity((1 - bw*0.7)*200*(-left));
 		}
-		else if(ov_roll %% old_roll == 0){
-			in1.move_relative(-0.1);
-			in1.move_relative(0.1);
+		else if(ov_roll && old_roll == 0){
+			in1.move_relative(-0.1, 100);
+			in2.move_relative(0.1, 100);
 		}
 		old_roll = ov_roll;
 
