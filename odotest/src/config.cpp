@@ -18,8 +18,8 @@ pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 const double kP = 500;
 const double kI = 1;
 const double kD = 0.0001;
-const double deadband = 0.02;
-const double intdeadband = 0.02;
+const double deadband = 0.01;
+const double intdeadband = 0.01;
 const double integral_max =20;
 
 const double rot_kP = 5;
@@ -50,8 +50,8 @@ pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 const double kP = 500;
 const double kI = 1;
 const double kD = 0.0001;
-const double deadband = 0.02;
-const double intdeadband = 0.02;
+const double deadband = 0.01;
+const double intdeadband = 0.01;
 const double integral_max =20;
 
 const double rot_kP = 5;

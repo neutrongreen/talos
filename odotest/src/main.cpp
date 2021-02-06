@@ -81,13 +81,41 @@ void autonomous() {
 
 	switch (auton_id) {
 		case 1:
-		#ifdef _OV_CONFIG_
-		move_to_position(0, 0.2);
-		roll1.move_velocity(600);
-		roll2.move_velocity(200);
+			move_to_position(0, 0.2);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			break;
+		case 2:
+		#ifndef _OV_CONFIG_
+			move_to_position(0, -0.3);
+			move_rotate(-45*side);
+			move_to_position(-0.14*side, -0.16);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(1000);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
+			move_to_position(0.75*side, -0.500);
+			move_rotate(45*side);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			move_to_position(1.09*side, -0.16);
+			break;
 		#else
-		move_to_position(0, 0.2);
-		roll1.move_velocity(200);
+			move_to_position(0, -0.3);
+			move_rotate(-45*side);
+			move_to_position(-0.14*side, -0.16);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(1000);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
+			move_to_position(0.75*side, -0.500);
+			move_rotate(50*side);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			move_to_position(1.11*side, -0.14);
+			break;
 		#endif
 		/*
 		case 2:
@@ -133,7 +161,7 @@ void opcontrol() {
 		h = -h;
 		#else
 		int lr_ov = master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN) - master.get_digital(pros::E_CONTROLLER_DIGITAL_B);
-		x = lr_ov ? lr_ov : x;
+		x = lr_ov ? -lr_ov : x;
 		#endif
     int left = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 		int right = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) - master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);

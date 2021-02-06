@@ -24,7 +24,7 @@ void update_position_x(double dt){
   vy =  v1 + v2;
   vx = v1 - v2;
   //convert to meters per seconds
-  dh = -degreesToRadians(gyro.get_heading());
+  dh = degreesToRadians(gyro.get_heading());
 
   vy = (vy/60)*WHEEL_C;
   vx = (vx/60)*WHEEL_C;
@@ -74,6 +74,7 @@ void move_to_position(double tx, double ty){
 
 		//get angle of vector from the x axis of the robot
 		double oh = atan2(oy, ox);
+
     /*
     if (oh < 0){
       oh += M_PI_2;
@@ -126,9 +127,6 @@ void move_to_position(double tx, double ty){
 //rotate robot
 void move_rotate(double th){
   //t  for target
-  #ifdef _OV_CONFIG_
-  th = -th;
-  #endif
   th = degreesToRadians(th);
   bool at_target = false;
   //init pid values
@@ -159,6 +157,9 @@ void move_rotate(double th){
     double pid_mag = error*rot_kP + integral*rot_kI + deriv*rot_kD;
 
     pid_mag = clip(pid_mag, -MAX_AUTON_RPM, MAX_AUTON_RPM);
+    #ifdef _OV_CONFIG_
+    pid_mag = -pid_mag;
+    #endif
     int speed = (int)round(pid_mag);
     pros::lcd::print(2, "speed: %d", speed);
     fl.move_velocity(speed);
