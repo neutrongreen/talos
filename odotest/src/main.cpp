@@ -100,7 +100,6 @@ void autonomous() {
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
 			move_to_position(1.09*side, -0.16);
-			break;
 		#else
 			move_to_position(0, -0.3);
 			move_rotate(-45*side);
@@ -115,8 +114,16 @@ void autonomous() {
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
 			move_to_position(1.11*side, -0.14);
-			break;
 		#endif
+			break;
+		case 3:
+		#ifdef _OV_CONFIG_
+			//luke code
+		#else
+			//sam code
+		#endif
+			break;
+
 		/*
 		case 2:
 			move_to_position(0.0, -0.4);
