@@ -89,7 +89,7 @@ void autonomous() {
 		#ifndef _OV_CONFIG_
 			move_to_position(0, -0.3);
 			move_rotate(-45*side);
-			move_to_position(-0.14*side, -0.16);
+			move_to_position(-0.10*side, -0.20);
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
 			pros::delay(1000);
@@ -103,7 +103,7 @@ void autonomous() {
 		#else
 			move_to_position(0, -0.3);
 			move_rotate(-45*side);
-			move_to_position(-0.14*side, -0.16);
+			move_to_position(-0.11*side, -0.18);
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
 			pros::delay(1000);
@@ -120,7 +120,24 @@ void autonomous() {
 		#ifdef _OV_CONFIG_
 			//luke code
 		#else
-			//sam code
+			move_to_position(0.75*side, -0.500);
+			move_rotate(50*side);
+			move_to_position(1.15*side, -0.14);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(1000);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
+			move_to_position(0.75*side, -0.500);
+			move_rotate(180);
+			move_to_position(-0.46*side, -1.1);
+			move_to_position(-0.46*side, -1.1);
+			move_to_position(-0.46*side, -1.355);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(1000);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
 		#endif
 			break;
 
@@ -189,6 +206,7 @@ void opcontrol() {
 		in2.move_velocity(200*(right ? right : overide));
 		#else
 		roll1.move_velocity(200*(right));
+		roll2.move_velocity(200*(right));
 		int bw = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 		int ov_roll = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
 		if (!ov_roll){

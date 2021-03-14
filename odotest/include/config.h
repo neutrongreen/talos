@@ -1,4 +1,4 @@
-#define _OV_CONFIG_
+//#define _OV_CONFIG_
 #ifndef _TALOS_CONFIG_
 #define _TALOS_CONFIG_
 #include "api.h"

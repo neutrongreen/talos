@@ -39,7 +39,7 @@ pros::Motor fr = pros::Motor(20, true);
 pros::Motor br = pros::Motor(12, true);
 
 pros::Motor roll1 = pros::Motor(2);
-pros::Motor roll2 = pros::Motor(16);
+pros::Motor roll2 = pros::Motor(9);
 
 pros::Motor in1 = pros::Motor(7);
 pros::Motor in2 =  pros::Motor(4);
@@ -47,7 +47,7 @@ pros::Motor in2 =  pros::Motor(4);
 pros::Imu gyro = pros::Imu(6);
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 
-const double kP = 500;
+const double kP = 600;
 const double kI = 1;
 const double kD = 0.0001;
 const double deadband = 0.01;
