@@ -81,26 +81,17 @@ void autonomous() {
 
 	switch (auton_id) {
 		case 1:
-			move_to_position(0, 0.2);
-			roll1.move_velocity(600);
-			roll2.move_velocity(200);
-			break;
-		case 2:
-		#ifndef _OV_CONFIG_
 			move_to_position(0, -0.3);
 			move_rotate(-45*side);
-			move_to_position(-0.10*side, -0.20);
+			move_to_position(-0.11*side, -0.18);
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
 			pros::delay(1000);
 			roll1.move_velocity(0);
 			roll2.move_velocity(0);
-			move_to_position(0.75*side, -0.500);
-			move_rotate(45*side);
-			roll1.move_velocity(600);
-			roll2.move_velocity(200);
-			move_to_position(1.09*side, -0.16);
-		#else
+			break;
+		case 2:
+		//two point foward
 			move_to_position(0, -0.3);
 			move_rotate(-45*side);
 			move_to_position(-0.11*side, -0.18);
@@ -110,37 +101,77 @@ void autonomous() {
 			roll1.move_velocity(0);
 			roll2.move_velocity(0);
 			move_to_position(0.75*side, -0.500);
-			move_rotate(50*side);
+			move_rotate(45*side);
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
-			move_to_position(1.11*side, -0.14);
-		#endif
+			move_to_position(1.14*side, -0.11);
 			break;
 		case 3:
-		#ifdef _OV_CONFIG_
-			//luke code
-		#else
 			move_to_position(0.75*side, -0.500);
 			move_rotate(50*side);
 			move_to_position(1.15*side, -0.14);
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
-			pros::delay(1000);
+			pros::delay(500);
 			roll1.move_velocity(0);
 			roll2.move_velocity(0);
 			move_to_position(0.75*side, -0.500);
 			move_rotate(180);
-			move_to_position(-0.46*side, -1.1);
-			move_to_position(-0.46*side, -1.1);
-			move_to_position(-0.46*side, -1.355);
+			move_to_position(-0.43*side, -1.1);
+			move_to_position(-0.43*side, -1.1);
+			move_to_position(-0.43*side, -1.355);
 			roll1.move_velocity(600);
 			roll2.move_velocity(200);
-			pros::delay(1000);
+			pros::delay(400);
 			roll1.move_velocity(0);
 			roll2.move_velocity(0);
-		#endif
+			break;
+		case 4:
+			move_to_position(0.75*side, -0.500);
+			move_rotate(50*side);
+			move_to_position(1.15*side, -0.14);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(500);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
 			break;
 
+		case 5:
+		//tree point
+			move_to_position(-0.11*side, -0.18);
+			move_rotate(-45*side);
+
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(400);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
+			move_to_position(0.75*side, -0.500);
+			in1.move_velocity(200);
+			in2.move_velocity(-200);
+			move_rotate(45*side);
+			move_to_position(1.11*side, -0.14);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(600);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
+			in1.move_velocity(-10);
+			in2.move_velocity(10);
+
+			//part 2
+			move_to_position(0.75*side, -0.500);
+			move_rotate(180);
+			move_to_position(-0.50*side, -1.355);
+			roll1.move_velocity(600);
+			roll2.move_velocity(200);
+			pros::delay(400);
+			roll1.move_velocity(0);
+			roll2.move_velocity(0);
+			break;
+
+			//move to mid
 		/*
 		case 2:
 			move_to_position(0.0, -0.4);

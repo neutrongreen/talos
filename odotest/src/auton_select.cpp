@@ -5,9 +5,9 @@ int auton_side = 0;
 //insperied by
 //https://github.com/kunwarsahni01/Vex-Autonomous-Selector/blob/master/selection.cpp
 //create defualt tabe
-const int autonSize = 4;
+const int autonSize = 6;
 const int autonIdSize = 2;
-static const char *btnmMapItems[] = {"No Auton","1 Point","2 Point いち", "2 Point M", "3 Point", ""};
+static const char *btnmMapItems[] = {"NA","1P M","2P", "2P M", "1P S", "3P", ""};
 static const char *sideBtnmMapItems[] = {"Left", "Right", ""};
 lv_obj_t *screen = lv_obj_create(NULL, NULL);;
 lv_obj_t *autonBtnm;
@@ -35,7 +35,7 @@ lv_res_t sideBtnmAction(lv_obj_t *btnm, const char *txt)
 }
 
 void gui_init(int default_auton){
-	static const char *btnmMap[] = {"No Auton","1 Point","2 Point いち", "2 Point M", "3 Point", ""};
+	static const char *btnmMap[] = {"NA","1P M","2P", "2P M", "1P S", "3P", ""};
 	static const char *sideBtnmMap[] = {"Left", "Right", ""};
 
   int i = 0;
